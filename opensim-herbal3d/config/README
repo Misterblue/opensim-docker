@@ -1,0 +1,24 @@
+CONFIGURATION ON DOCKER IMAGE
+
+The OpenSim docker image is setup with most of the normal configuration nulled out.
+The file 'bin/OpenSim.ini.example' has been copied to 'bin/OpenSim.ini' but all
+the files that includes (from 'bin/config-include') have been emptied so none
+of the normal network, grid, database, or cache setup is present.
+
+The configuration relies on the feature that OpenSimulator reads any INI file
+that is in the 'bin/config' directory.
+
+The default installation is for a single region, standalone, sqlite based version
+of OpenSimulator. 'bin/config/setup.sh' copies 'bin/config/docker-standalone/Includes.ini'
+into 'bin/config'. This file includes all the INI files
+needed to configure same. 'Includes.ini' includes files from the 'docker-standalone'
+directory. This includes 'Standalone.ini' and 'StandaloneCommon.ini' to do their
+normal configuration. It finally includes 'misc.ini' which specifies parameters
+that overlay everything previous for final setting and over-riding.
+
+If running the docker image with any non-standalone configuration, mount
+a bind volume over '/home/opensim/opensim/bin/config' to replace all configuration.
+
+When the docker image is run, the startup script also checks for 'bin/config/setup.sh'
+and, if it exists, it is executed. This allows initializing databases and any
+passwords that need to be set in the configuration files.

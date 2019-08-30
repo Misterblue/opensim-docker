@@ -1,0 +1,3 @@
+# File of configuration parameters that are applied when OpenSimulator is run.
+
+export CONFIG_NAME=${CONFIG_NAME:-docker-standalone}
