@@ -16,10 +16,13 @@ if [[ ! -z "$MYSQL_ROOT_PASSWORD" ]] ; then
     rm -f "$SQLCMDS"
     rm -f "$SQLOPTIONS"
 
+    # If the database is started at the same time, what for it to initialize
+    sleep 10
+
     cat > "$SQLCMDS" <<EOFFFF
 CREATE DATABASE opensim;
 USE opensim;
-CREATE USER 'opensim'@'%' IDENTIFIED BY '$OPENSIM_DB_PASSWORD';
+CREATE USER 'opensim'@'%' IDENTIFIED BY '$MYSQL_DB_PASSWORD';
 GRANT ALL ON opensim.* to 'opensim'@'%';
 quit
 EOFFFF
@@ -27,13 +30,14 @@ EOFFFF
 [client]
 user=root
 password=$MYSQL_ROOT_PASSWORD
+host=$MYSQL_DB_SOURCE
 EOFFFF
 
-    HASDB=$(mysql --silent --defaults-extra=file=$SQLOPTIONS -e "show databases" | grep "^opensim$")
+    HASDB=$(mysql --defaults-extra-file=$SQLOPTIONS -e "show databases" | grep "^opensim$")
 
     if [[ -z "$HASDB" ]] ; then
         echo "creating opensim database"
-        mysql --silent --defaults-extra=file=$SQLOPTIONS < "$SQLCMDS"
+        mysql --defaults-extra-file=$SQLOPTIONS < "$SQLCMDS"
     else
         echo "opensim database has already been created"
     fi

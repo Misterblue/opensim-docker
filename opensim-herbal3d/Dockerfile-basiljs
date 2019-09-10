@@ -1,0 +1,39 @@
+# Docker container with nginx server service up a Javascript Basil viewer
+
+FROM node:10 as built
+
+ENV DIR=/tmp/app
+
+# 'node' image seems to have the latest 'git' in it already
+#RUN apt-get update \
+#    && apt-get install -y \
+#        git \
+#    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p "$DIR" \
+    && cd "$DIR" \
+    && git clone https://github.com/Misterblue/basil.git \
+    && cd basil/Basiljs \
+    && npm install \
+    && npm run build
+
+# ============================================================================
+FROM nginx:latest
+
+ENV DIR=/tmp/app
+
+LABEL Version="0.1"
+LABEL Description="Docker container for serving Basiljs"
+
+# These are not used except for debugging
+# RUN apt-get update \
+#     && apt-get install -y \
+#         coreutils \
+#         procps \
+#         vim \
+#     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=built $DIR/basil/Basiljs/dist/ /usr/share/nginx/html
+
+EXPOSE 80/tcp
+
