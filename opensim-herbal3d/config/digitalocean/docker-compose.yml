@@ -4,10 +4,16 @@ version: '3'
 services:
 
     mysql:
-        image: mariadb/server:latest
+        # MySql version 8 requires a bunch of new security stuff. Stay with v5.
+        # image: mysql:5
+        image: mariadb:latest
         # container_name: opensim-herbal3d-mysql
         environment:
             MYSQL_ROOT_PASSWORD:
+        # Parameters added to invocation.
+        # Default is to flush after every operation which slows Docker image down.
+        # This flushes log once a second.
+        command: --innodb_flush_log_at_trx_commit=2 --sync_binlog=0
         volumes:
             - ~/mysql-data:/var/lib/mysql
         # restart: always
