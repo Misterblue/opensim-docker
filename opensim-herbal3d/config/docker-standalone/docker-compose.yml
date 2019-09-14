@@ -5,8 +5,9 @@ services:
         image: opensim-herbal3d
 
         environment:
-            CONFIGKEY: "${CONFIGKEY}"
-            EXTERNAL_HOSTNAME: "${EXTERNAL_HOSTNAME}"
+            CONFIGKEY:
+            CONFIG_NAME:
+            EXTERNAL_HOSTNAME:
 
         ports:
             - 8002:8002/tcp
