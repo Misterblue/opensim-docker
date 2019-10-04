@@ -1,3 +1,0 @@
-*/2 * * * * /home/opensim/checkOpenSim.sh
-*/30 * * * * /home/opensim/checkOldLogFiles.sh
-
