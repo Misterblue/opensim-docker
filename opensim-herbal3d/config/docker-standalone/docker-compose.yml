@@ -18,6 +18,4 @@ services:
             - 9050:9050/udp
             - 11440-11449:11440-11449
 
-        volumes:
-
         # restart: always
