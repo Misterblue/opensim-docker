@@ -7,7 +7,7 @@ CONFIGDIR=${CONFIGDIR:-$OPENSIMBIN/config}
 FIRSTTIMEFLAG=${CONFIGDIR}/.configFirstTime
 
 cd "$CONFIGDIR"
-# This sets CONFIG_NAME which is the configuration subdirectory (like docker-standalone)
+# This sets CONFIG_NAME which is the configuration subdirectory (like standalone)
 source ./scripts/setEnvironment.sh
 
 if [[ ! -e "$FIRSTTIMEFLAG" ]] ; then

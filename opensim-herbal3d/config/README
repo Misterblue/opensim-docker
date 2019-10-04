@@ -9,9 +9,9 @@ The configuration relies on the feature that OpenSimulator reads any INI file
 that is in the 'bin/config' directory.
 
 The default installation is for a single region, standalone, sqlite based version
-of OpenSimulator. 'bin/config/setup.sh' copies 'bin/config/docker-standalone/Includes.ini'
+of OpenSimulator. 'bin/config/setup.sh' copies 'bin/config/standalone/Includes.ini'
 into 'bin/config'. This file includes all the INI files
-needed to configure same. 'Includes.ini' includes files from the 'docker-standalone'
+needed to configure same. 'Includes.ini' includes files from the 'standalone'
 directory. This includes 'Standalone.ini' and 'StandaloneCommon.ini' to do their
 normal configuration. It finally includes 'misc.ini' which specifies parameters
 that overlay everything previous for final setting and over-riding.

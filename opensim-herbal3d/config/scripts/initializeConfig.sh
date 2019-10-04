@@ -3,7 +3,7 @@
 # Someone has set the environment variables before running this.
 
 OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin/}
-CONFIG_NAME=${CONFIG_NAME:-docker-standalone}
+CONFIG_NAME=${CONFIG_NAME:-standalone}
 
 CONFIGDIR=${OPENSIMBIN}/config/${CONFIG_NAME}
 
