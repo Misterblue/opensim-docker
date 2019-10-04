@@ -25,7 +25,7 @@ fi
 
 export CONFIGKEY=$CONFIGKEY
 export EXTERNAL_HOSTNAME=$EXTERNAL_HOSTNAME
-export CONFIG_NAME=${CONFIG_NAME:-docker-standalone}
+export CONFIG_NAME=${CONFIG_NAME:-standalone}
 
 # This export fakes out the environment setup script to look for files in
 #    build environment rather than in run environment.

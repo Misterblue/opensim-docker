@@ -17,7 +17,7 @@ setup has:
 - the default OpenSimDefault.ini and OpenSim.ini in place
 - all of the usual config-include files nulled out (empty)
 - a 'bin/config/os-config' file that defines the environment variable 'CONFIG_NAME'
-- the default 'CONFIG_NAME' of 'docker-standalone'
+- the default 'CONFIG_NAME' of 'standalone'
 - a set of scripts in 'bin/config' that initialized and configure
 
 `/usr/opensim/bootOpenSim.sh` calls `/usr/opensim/opensim/bin/config/setup.sh` to
@@ -51,7 +51,7 @@ environment variable.
 
 Initially, there are two configuratios:
 
-- docker-standalone: a simple run of OpenSimulator image in a single docker container
+- standalone: a simple run of OpenSimulator image in a single docker container
 - three: this creates a three docker container set that includes:
   * OpenSimulator simulator with the Herbal3d addon-modules;
   * an nginx web server serving BasilJS; and
