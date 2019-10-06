@@ -93,7 +93,7 @@ cd opensim-docker/opensim-standalone
 ./build-standalone.sh
 
 # Run the composed container set
-CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERANL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
 
 ```
 

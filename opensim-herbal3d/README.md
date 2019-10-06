@@ -1,5 +1,10 @@
 This builds various configurations of [OpenSimulator] modified with the
 [Herbal3d] region modules and running in [Docker] containers.
+The `docker-compose` setup runs three containers:
+
+- [OpenSimulator] image containing the [Herbal3d] modules,
+- [MariaDB] image for the simulator database,
+- [nginx] server serving the [BasilJS] web pages for viewing/testing [Herbal3d]
 
 ## OpenSimulator Image
 
@@ -68,7 +73,7 @@ The steps to build and run the containers:
 ```bash
 # Get these configuration files
 cd
-git clone https://github.com/Misterblue/opensim-docker.git
+git clone https://github.com/Herbal3d/opensim-docker.git
 cd opensim-docker/opensim-herbal3d
 
 export CONFIG_NAME=three
@@ -96,12 +101,13 @@ cd opensim-docker/opensim-herbal3d
 ./build-basiljs.sh
 
 # Run the composed container set
-# (Note: CONFIG_NAME set with the 'export' above)
-CONFIGKEY=secretPassword EXTERANL_HOSTNAME=whateverTheHostnameIs ./run-herbal3d.sh
+CONFIG_NAME=three CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-herbal3d.sh
 
 ```
 
 [OpenSimulator]: https://opensimulator.org
 [Docker]: https://www.docker.com
 [Herbal3d]: https://www.herbal3d.org
+[BasilJS]: https://github.com/Herbal3d/basil
+[nginx]: https://www.nginx.com/
 

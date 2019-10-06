@@ -12,7 +12,7 @@ ENV DIR=/tmp/app
 
 RUN mkdir -p "$DIR" \
     && cd "$DIR" \
-    && git clone https://github.com/Misterblue/basil.git \
+    && git clone https://github.com/Herbal3d/basil.git \
     && cd basil/Basiljs \
     && npm install \
     && npm run build
