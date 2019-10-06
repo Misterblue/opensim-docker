@@ -1,0 +1,2 @@
+*/30 * * * * /home/opensim/checkOldLogFiles.sh
+
