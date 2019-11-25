@@ -39,6 +39,13 @@ if [[ -e "config/$CONFIG_NAME/docker-compose.yml" ]] ; then
     COMPOSEFILE="config/$CONFIG_NAME/docker-compose.yml"
 fi
 
+# Local directory for storage of sql persistant data (so region
+#    contents persists between container restarts).
+# This must be the same directory as in $CONFIG_NAME/docker-compose.yml.
+if [[ ! -d "$HOME/mysql-data" ]] ; then
+    mkdir -p "$HOME/mysql-data"
+fi
+
 docker-compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-standalone \
