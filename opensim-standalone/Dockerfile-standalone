@@ -51,15 +51,6 @@ COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
 # Use the default, included configuration parameters
 RUN cp $OPENSIMDIR/bin/OpenSim.ini.example $OPENSIMDIR/bin/OpenSim.ini
 
-# Build OpenSimulator
-RUN cd $OPENSIMDIR \
-    && ./runprebuild.sh \
-    && msbuild
-
-# Remove sources that are not needed for running
-RUN cd $OPENSIMDIR \
-    && rm -rf OpenSim
-
 WORKDIR $OPENSIMDIR/bin
 ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
 
