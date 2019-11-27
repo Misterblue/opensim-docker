@@ -16,9 +16,6 @@ if [[ ! -z "$MYSQL_ROOT_PASSWORD" ]] ; then
     rm -f "$SQLCMDS"
     rm -f "$SQLOPTIONS"
 
-    # If the database is started at the same time, what for it to initialize
-    sleep 10
-
     cat > "$SQLCMDS" <<EOFFFF
 CREATE DATABASE opensim;
 USE opensim;
@@ -32,6 +29,13 @@ user=root
 password=$MYSQL_ROOT_PASSWORD
 host=$MYSQL_DB_SOURCE
 EOFFFF
+
+    # If the database is started at the same time, what for it to initialize
+    until mysql --defaults-extra-file=$SQLOPTIONS -e "show databases" ; do
+        echo "initializeDb.sh: Waiting on database to be ready"
+        sleep 2
+    done
+    echo "initializeDb.sh: Database is ready"
 
     HASDB=$(mysql --defaults-extra-file=$SQLOPTIONS -e "show databases" | grep "^opensim$")
 
