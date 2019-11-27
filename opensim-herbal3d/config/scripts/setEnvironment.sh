@@ -8,6 +8,8 @@ cd "$OPENSIMCONFIG"
 
 if [[ -e "./os-config" ]] ; then
     source ./os-config
+else
+    CONFIG_NAME=standalone
 fi
 
 # See if we have encrypted secrets

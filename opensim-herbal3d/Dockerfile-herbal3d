@@ -9,62 +9,10 @@ LABEL Description="Docker container running OpenSimulator with Herbal3d extensio
 
 ENV OPENSIMDIR=/home/opensim/opensim
 
+# Include required packages ('coreutils git vim' included for debugging)
 RUN apt-get update \
     && apt-get install -y \
         coreutils procps git vim \
-        screen \
-        ccrypt \
-        cron \
-        mysql-client \
-        sqlite \
-    && rm -rf /var/lib/apt/lists/*
-
-# Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY scripts/* /home/opensim/
-COPY vimrc /home/opensim/.vimrc
-
-# Fetch the latest version of the OpenSimulator sources.
-RUN cd /home/opensim \
-    && git clone git://opensimulator.org/git/opensim \
-    && cp $OPENSIMDIR/bin/OpenSim.ini.example $OPENSIMDIR/bin/OpenSim.ini
-
-# Add the Herbal3d addon modules
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
-    && git clone https://github.com/Herbal3d/HerbalTransportCS.git \
-    && git clone https://github.com/Herbal3d/Loden.git \
-    && git clone https://github.com/Herbal3d/OSAuthModule.git \
-    && git clone https://github.com/Herbal3d/RaguOS.git
-
-# OpenSim.ini does an include of "config-include/Standalone.ini".
-#     so copy an empty version to nullfy the default configuration.
-COPY config-include/ $OPENSIMDIR/bin/config-include/
-# Copy over any extra configuration files we're including
-RUN mkdir -p $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/Loden/config/Loden.ini $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/RaguOS/config/RaguOS.ini $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/OSAuthModule/config/OSAuth.ini $OPENSIMDIR/bin/config
-COPY config/ $OPENSIMDIR/bin/config/
-
-
-# Build OpenSimulator
-RUN cd $OPENSIMDIR \
-    && ./runprebuild.sh \
-    && nuget restore OpenSim.sln \
-    && cp packages/*/lib/net45/* bin \
-    && msbuild
-
-# ============================================================================
-# 'slim' doesn't run OpenSimulator so it can't be used
-# FROM mono:5-slim
-FROM mono:5
-
-ENV OPENSIMDIR=/home/opensim/opensim
-
-RUN apt-get update \
-    && apt-get install -y \
-        coreutils git vim \
-        procps \
         screen \
         ccrypt \
         cron \
@@ -76,9 +24,44 @@ RUN apt-get update \
 # (From https://stackoverflow.com/questions/27701930/add-user-to-docker-container)
 RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
 
-COPY --from=built --chown=opensim:opensim /home/opensim/ /home/opensim
-
 USER opensim:opensim
+
+# Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
+COPY --chown=opensim:opensim scripts/* /home/opensim/
+COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
+
+# Fetch and build the latest version of the OpenSimulator sources.
+# This includes a lot of steps so we can delete the sources and git files
+#    to make the resulting layer small.
+RUN cd /home/opensim \
+    && git clone git://opensimulator.org/git/opensim \
+    && rm -rf $OPENSIMDIR/.git \
+    && cd $OPENSIMDIR/addon-modules/ \
+    && git clone https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
+    && git clone https://github.com/Herbal3d/HerbalTransportCS.git \
+    && git clone https://github.com/Herbal3d/Loden.git \
+    && git clone https://github.com/Herbal3d/OSAuthModule.git \
+    && git clone https://github.com/Herbal3d/RaguOS.git \
+    && mkdir -p $OPENSIMDIR/bin/config \
+    && cp $OPENSIMDIR/addon-modules/Loden/config/Loden.ini $OPENSIMDIR/bin/config \
+    && cp $OPENSIMDIR/addon-modules/RaguOS/config/RaguOS.ini $OPENSIMDIR/bin/config \
+    && cp $OPENSIMDIR/addon-modules/OSAuthModule/config/OSAuth.ini $OPENSIMDIR/bin/config \
+    && cd $OPENSIMDIR \
+    && ./runprebuild.sh \
+    && nuget restore OpenSim.sln \
+    && cp packages/*/lib/net45/* bin \
+    && msbuild \
+    && cd $OPENSIMDIR \
+    && rm -rf $OPENSIMDIR/OpenSim \
+    && rm -rf $OPENSIMDIR/addon-modules
+
+# Use the default, included configuration parameters
+RUN cp $OPENSIMDIR/bin/OpenSim.ini.example $OPENSIMDIR/bin/OpenSim.ini
+# OpenSim.ini does an include of "config-include/Standalone.ini".
+#     so copy an empty version to nullfy the default configuration.
+COPY --chown=opensim:opensim config-include/ $OPENSIMDIR/bin/config-include/
+COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
+
 WORKDIR $OPENSIMDIR/bin
 ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
 
