@@ -38,7 +38,7 @@ RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
 USER opensim:opensim
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=opensim:opensim scripts/* /home/opensim/
+COPY --chown=opensim:opensim run-scripts/* /home/opensim/
 COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
 
 # Version information that goes in the image
