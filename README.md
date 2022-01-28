@@ -5,6 +5,11 @@ Various configuration files and setups for running [OpenSimulator] in
 and then that image can be run with different configurations (standalone,
 grid, ...).
 
+There was a presentation on this project at the
+[OpenSimulator Community Conference 2019](https://conference.opensimulator.org/2019/)
+that is available at
+[OSCC19 Dockerizing OpenSimulator](https://www.youtube.com/watch?v=-EnTepHqLA4) .
+
 There are two possible images: `opensim-standalone` which is straight [OpenSimulator]
 'master' branch, and `opensim-herbal3d` which is [OpenSimulator] built with
 the [Herbal3d] addon modules. These base images can have different runtime
