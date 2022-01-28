@@ -4,6 +4,7 @@
 #    runs the first time setup. Otherwise it just sets things running.
 
 export OPENSIMHOME=/home/opensim
+export VERSIONDIR=$OPENSIMHOME/VERSION
 export OPENSIMBIN=$OPENSIMHOME/opensim/bin
 export OPENSIMCONFIG=$OPENSIMBIN/config
 
@@ -31,6 +32,8 @@ if [[ ! -e "$FIRSTTIMEFLAG" ]] ; then
 fi
 
 # Start Opensim
+echo "Starting OpenSimulator version $(cat $VERSIONDIR/OS_VERSION) with opensim-docker version $(cat $VERSIONDIR/OS_DOCKER_IMAGE_VERSION)"
+
 cd "$OPENSIMHOME"
 ./run.opensim.sh
 while true ; do

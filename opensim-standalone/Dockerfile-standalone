@@ -1,27 +1,38 @@
 # OpenSim for a container
 #   docker build -t opensim-standalone .
 
-FROM mono:5 as built
-# FROM mono:4.6 as built
+FROM mono:6
 
-LABEL Version="0.1"
 LABEL Description="Docker container running OpenSimulator"
 
 ENV OPENSIMDIR=/home/opensim/opensim
+ENV VERSIONDIR=/home/opensim/VERSION
+
+# Arguments passed in so they can be embedded in the built image
+ARG BUILD_DATE
+ARG BUILD_DAY
+ARG OS_DOCKER_VERSION
+ARG OS_DOCKER_GIT_BRANCH
+ARG OS_DOCKER_GIT_COMMIT
+ARG OS_DOCKER_GIT_COMMIT_SHORT
+
+# Arguments for fetching OpenSimulator
+ARG OS_REPO=git://opensimulator.org/git/opensim
+ARG OS_BRANCH=master
 
 # Include required packages ('coreutils git vim' included for debugging)
+#  (20220127 using MariaDB as Mono image built on Debian 10)
 RUN apt-get update \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
         ccrypt \
         cron \
-        mysql-client \
+        mariadb-client \
         sqlite \
     && rm -rf /var/lib/apt/lists/*
 
 # The simulator is run under the user name 'opensim'
-# (From https://stackoverflow.com/questions/27701930/add-user-to-docker-container)
 RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
 
 USER opensim:opensim
@@ -30,17 +41,33 @@ USER opensim:opensim
 COPY --chown=opensim:opensim scripts/* /home/opensim/
 COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
 
+# Version information that goes in the image
+RUN mkdir -p $VERSIONDIR \
+    && cd $VERSIONDIR \
+    && echo $BUILD_DATE > "BUILD_DATE" \
+    && echo $BUILD_DAY > "BUILD_DAY" \
+    && echo $OS_DOCKER_VERSION > "OS_DOCKER_VERSION" \
+    && echo $OS_DOCKER_GIT_BRANCH > "OS_DOCKER_GIT_BRANCH" \
+    && echo $OS_DOCKER_GIT_COMMIT > "OS_DOCKER_GIT_COMMIT" \
+    && echo $OS_DOCKER_GIT_COMMIT_SHORT > "OS_DOCKER_GIT_COMMIT_SHORT" \
+    && echo ${OS_DOCKER_VERSION}-${BUILD_DAY}-${OS_DOCKER_GIT_COMMIT_SHORT} > "OS_DOCKER_IMAGE_VERSION"
+
 # Fetch and build the latest version of the OpenSimulator sources.
-# THis includes a lot of steps so we can delete the sources and git files
-#    to make the resulting layer small.
 RUN cd /home/opensim \
-    && git clone git://opensimulator.org/git/opensim \
-    && rm -rf $OPENSIMDIR/.git \
+    && git clone --depth=1 $OS_REPO opensim \
     && cd $OPENSIMDIR \
-    && ./runprebuild.sh \
-    && msbuild \
-    && cd $OPENSIMDIR \
-    && rm -rf OpenSim
+    && git checkout $OS_BRANCH
+
+RUN cd $OPENSIMDIR \
+    && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
+    && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
+    && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
+        sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
+
+RUN cd $OPENSIMDIR \
+    && chmod +x runprebuild48.sh \
+    && ./runprebuild48.sh \
+    && msbuild
 
 # OpenSim.ini does an include of "config-include/Standalone.ini".
 #     so copy an empty version to nullfy the default configuration.
