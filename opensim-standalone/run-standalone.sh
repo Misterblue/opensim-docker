@@ -1,5 +1,5 @@
 #! /bin/bash
-# Run the standalone configuration.
+# Run the default Docker image using the standalone configuration.
 
 # Since the initial run has to create and initialize the MYSQL database
 #    the first time, this sets the passwords into the environment before

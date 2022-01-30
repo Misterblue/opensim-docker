@@ -18,6 +18,7 @@ if [[ ! -z "$CONFIGKEY" ]] ; then
     for secretsFile in $OPENSIMCONFIG/$CONFIG_NAME/os-secrets.crypt $OPENSIMCONFIG/os-secrets.crypt ; do
         if [[ -e "$secretsFile" ]] ; then
             source <(ccrypt -c -E CONFIGKEY "$secretsFile")
+            HAVE_SECRETS=yes
             break;
         fi
     done

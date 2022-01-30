@@ -1,7 +1,8 @@
 # OpenSim with Herbal3d region modules
 #   docker build -t opensim-herbal3d .
 
-FROM mono:5 as built
+FROM mono:6 as built
+# FROM mono:5 as built
 # FROM mono:4.6 as built
 
 LABEL Version="0.1"
@@ -18,7 +19,7 @@ RUN apt-get update \
         cron \
         mysql-client \
         sqlite \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # The simulator is run under the user name 'opensim'
 # (From https://stackoverflow.com/questions/27701930/add-user-to-docker-container)
@@ -35,7 +36,6 @@ COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
 #    to make the resulting layer small.
 RUN cd /home/opensim \
     && git clone git://opensimulator.org/git/opensim \
-    && rm -rf $OPENSIMDIR/.git \
     && cd $OPENSIMDIR/addon-modules/ \
     && git clone https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
     && git clone https://github.com/Herbal3d/HerbalTransportCS.git \
@@ -49,7 +49,7 @@ RUN cd /home/opensim \
     && cd $OPENSIMDIR \
     && ./runprebuild.sh \
     && nuget restore OpenSim.sln \
-    && cp packages/*/lib/net45/* bin \
+    && cp -f packages/*/lib/net45/* bin \
     && msbuild \
     && cd $OPENSIMDIR \
     && rm -rf $OPENSIMDIR/OpenSim \
