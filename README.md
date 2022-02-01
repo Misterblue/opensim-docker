@@ -10,12 +10,22 @@ There was a presentation on this project at the
 that is available at
 [OSCC19 Dockerizing OpenSimulator](https://www.youtube.com/watch?v=-EnTepHqLA4) .
 
-There are two possible images: `opensim-standalone` which is straight [OpenSimulator]
-'master' branch, and `opensim-herbal3d` which is [OpenSimulator] built with
-the [Herbal3d] addon modules. These base images can have different runtime
-configurations which includes running with a seperate [Docker] container for
-the database (uses [MariaDB]) and/or different [OpenSimulator] configuration
-files.
+This is organized into building *images* and *config*s for those images.
+The model is for one to build a Docker image with one of the [OpenSimulator]
+images in it and, at runtime, choose one of the embedded configurations to
+run it with. The [OpenSimulator] "image" is a built version of the source
+code and the "config" is the collection of INI files that are used to run it.
+
+Two images are currently present: `image-opensim` which is a built of the
+straight [OpenSimulator] 'master' branch,
+and `image-opensim-herbal3d` which is [OpenSimulator] built with
+the [Herbal3d] addon modules.
+(Since I'm the Herbal3d main developer, this is how I test it.)
+
+The Docker images are run using `docker-compose` to set up ports
+and environment. Additionally, if a database server is needed,
+that is also started and linked to the [OpenSimulator] instance.
+[MariaDB] is used for the external SQL server.
 
 As an example, to create a standalone version that creates two containers
 (simulator and database):
@@ -26,7 +36,7 @@ cd
 git clone https://github.com/Misterblue/opensim-docker.git
 
 # Use the standalone setup for this example
-cd opensim-docker/opensim-standalone
+cd opensim-docker/image-opensim
 
 # Select the runtime configuration to use
 export CONFIG_NAME=standalone-mysql
@@ -45,14 +55,14 @@ rm tmpfile
 
 # Build OpenSimulator image
 cd
-cd opensim-docker/opensim-standalone
-./build-standalone.sh
+cd opensim-docker/image-opensim
+./build-opensim.sh
 
 # Run the composed container set
 CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
 ```
 
-As of October 2019, these [Docker] images have not been built and uploaded
+As of January 2022, these [Docker] images have not been built and uploaded
 anywhere as you will probably want to be using the latest [OpenSimulator]
 sources and thus require a fresh build.
 
@@ -71,15 +81,15 @@ The simulator runs as the created user account `opensim` for a little security.
 
 The `README` files in the sub-directories contain instructions on setup
 of these configuration files and building the images. There are scripts
-for building the images (e.g., `build-standalone.sh`) and then running
-the images with `docker-compose` (e.g., `run-standalone.sh`).
+for building the images (e.g., `build-opensim.sh`) and then running
+the images with `docker-compose` (e.g., `run-opensim.sh`).
 
 ## OpenSimulator Configuration
 
 The biggest problem with Docker'izing [OpenSimulator] is the configuration
 file setup -- [OpenSimulator] has manual setup and configuration files
 scattered around. Add to that the radically different runtime setups possible
-(stand-alone with or without databases and grid hosting or grid connected)
+(standalone with or without databases and grid hosting or grid connected)
 and a generalized, containerable configuration becomes difficult.
 
 The solution used here is to mostly null out the configuration that comes

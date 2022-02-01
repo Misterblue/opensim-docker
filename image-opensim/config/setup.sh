@@ -6,8 +6,10 @@
 #   -- move sub-config specific Includes.ini into the config directory
 #   -- update all the configuration files with environment variables
 
-OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
-CONFIGDIR=${CONFIGDIR:-$OPENSIMBIN/config}
+export OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
+export CONFIGDIR=${CONFIGDIR:-$OPENSIMBIN/config}
+
+echo "opensim-docker: setup.sh: CONFIGDIR=\"${CONFIGDIR}\""
 
 FIRSTTIMEFLAG=${CONFIGDIR}/.configFirstTime
 
@@ -17,6 +19,7 @@ source ./scripts/setEnvironment.sh
 
 # If this is the first time run, do database setup and some one-time configuration updates
 if [[ ! -e "$FIRSTTIMEFLAG" ]] ; then
+    echo "opensim-docker: setup.sh: first time"
     cd "$CONFIGDIR"
     # Do any database account and db creation
     ./scripts/initializeDb.sh
@@ -29,8 +32,11 @@ fi
 #    after bin/OpenSimDefaults.ini and bin/OpenSim.ini
 cd "$CONFIGDIR"
 if [[ -e "${CONFIG_NAME}/Includes.ini" ]] ; then
+    echo "opensim-docker: setup.sh: Copying \"${CONFIG_NAME}/Includes.ini\""
     cp "${CONFIG_NAME}/Includes.ini" .
 fi
+
+echo "opensim-docker: setup.sh: CONFIG_NAME=${CONFIG_NAME}"
 
 # Do any update to configuration files that happens each start
 # This updates bin/OpenSim.ini and Regions/*.ini with needed values

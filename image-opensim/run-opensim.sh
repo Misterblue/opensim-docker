@@ -33,6 +33,7 @@ export OPENSIMBIN=$BASE
 source config/scripts/setEnvironment.sh
 unset OPENSIMBIN
 
+# Use the generic docker-compose file or the one specific to the configuration if it exists
 cd "$BASE"
 COMPOSEFILE=./docker-compose.yml
 if [[ -e "config/$CONFIG_NAME/docker-compose.yml" ]] ; then
@@ -51,5 +52,4 @@ docker-compose \
     --project-name opensim-standalone \
     --project-directory "$BASE" \
     up \
-    -d \
-    opensim
+    --detach

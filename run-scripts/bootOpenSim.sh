@@ -32,7 +32,9 @@ if [[ ! -e "$FIRSTTIMEFLAG" ]] ; then
 fi
 
 # Start Opensim
-echo "Starting OpenSimulator version $(cat $VERSIONDIR/OS_VERSION) with opensim-docker version $(cat $VERSIONDIR/OS_DOCKER_IMAGE_VERSION)"
+echo "Starting OpenSimulator version $(cat $VERSIONDIR/OS_VERSION)"
+echo "   with opensim-docker version $(cat $VERSIONDIR/OS_DOCKER_IMAGE_VERSION)"
+echo "   using configuration set \"$CONFIG_NAME\""
 
 cd "$OPENSIMHOME"
 ./run.opensim.sh

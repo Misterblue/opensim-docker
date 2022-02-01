@@ -38,8 +38,9 @@ RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
 USER opensim:opensim
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=opensim:opensim run-scripts/* /home/opensim/
-COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
+COPY --chown=opensim:opensim temp-run-scripts/*.sh /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/crontab /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/.vimrc /home/opensim/
 
 # Version information that goes in the image
 RUN mkdir -p $VERSIONDIR \
@@ -52,18 +53,20 @@ RUN mkdir -p $VERSIONDIR \
     && echo $OS_DOCKER_GIT_COMMIT_SHORT > "OS_DOCKER_GIT_COMMIT_SHORT" \
     && echo ${OS_DOCKER_VERSION}-${BUILD_DAY}-${OS_DOCKER_GIT_COMMIT_SHORT} > "OS_DOCKER_IMAGE_VERSION"
 
-# Fetch and build the latest version of the OpenSimulator sources.
+# Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
     && git clone --depth=1 $OS_REPO opensim \
     && cd $OPENSIMDIR \
     && git checkout $OS_BRANCH
 
+# Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
     && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
     && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
     && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
         sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
 
+# Build OpenSimulator
 RUN cd $OPENSIMDIR \
     && chmod +x runprebuild48.sh \
     && ./runprebuild48.sh \
@@ -71,8 +74,10 @@ RUN cd $OPENSIMDIR \
 
 # OpenSim.ini and other INI files include from "config-include/*"
 #     so copy an empty versions to nullfy the default configuration.
-COPY --chown=opensim:opensim config-include/ $OPENSIMDIR/bin/config-include/
-# Copy over any extra configuration files we're including
+RUN cd $OPENSIMDIR/bin \
+    && /home/opensim/nullOutConfigInclude.sh
+
+# Copy the configuration file sets for this image
 RUN mkdir -p $OPENSIMDIR/bin/config
 COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
 # Use the default, included configuration parameters

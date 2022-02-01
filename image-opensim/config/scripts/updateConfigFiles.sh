@@ -10,24 +10,26 @@ CONFIG_NAME=${CONFIG_NAME:-standalone}
 CONFIGDIR=${OPENSIMBIN}/config/${CONFIG_NAME}
 
 cd "$CONFIGDIR"
-source ../setEnvironment.sh
+source ../scripts/setEnvironment.sh
 
 # Update EXTERNAL_HOSTNAME
 cd "$OPENSIMBIN"
 for file in $OPENSIMBIN/Regions/*.ini $CONFIGDIR/Regions/*.ini ; do
     if [[ -e "$file" ]] ; then
+        echo "opensim-docker: updateConfigFiles.sh: fixing ExternalHostname in \"$file\""
         sed --in-place -e "s/^ExternalHostName = .*$/ExternalHostName = \"${EXTERNAL_HOSTNAME}\"/" "$file"
     fi
 done
 
 # Add EXTERNAL_HOSTNAME to the common configuation in OpenSim.ini
 sed --in-place -e "s/^ *BaseHostname = .*$/  BaseHostname = ${EXTERNAL_HOSTNAME}/" "$OPENSIMBIN/OpenSim.ini"
+echo "opensim-docker: updateConfigFiles.sh: fixing BaseHostname in OpenSim.ini"
+grep " BaseHostname =" "$OPENSIMBIN/OpenSim.ini"
+
 
 # If the environment variables haven't been copied into misc.ini, do it now
+echo "opensim-docker: updateConfigFiles.sh: replacing vars in \"${CONFIGDIR}/misc.ini\""
 # If the replacement has already happened, this is a NOOP
-if [[ -e "${CONFIGDIR}/misc.ini.prototype" ]] ; then
-    cp "${CONFIGDIR}/misc.ini.prototype" "${CONFIGDIR}/misc.ini"
-fi
 sed --in-place \
     -e "s/MYSQL_DB_USER/$MYSQL_DB_USER/" \
     -e "s/MYSQL_DB_SOURCE/$MYSQL_DB_SOURCE/" \
