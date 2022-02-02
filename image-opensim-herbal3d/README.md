@@ -1,3 +1,5 @@
+*NOTE* as of Feb 2022, this image isn't working. Updates coming.
+
 This builds various configurations of [OpenSimulator] modified with the
 [Herbal3d] region modules and running in [Docker] containers.
 The `docker-compose` setup runs three containers:

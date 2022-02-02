@@ -54,7 +54,7 @@ environment variable.
 Initially, there are two configuratioms:
 
 - standalone: a simple run of OpenSimulator image in a single docker container using SQLite for the simulator database
-- standalone-mysql: a configuration that uses MariaDB for the simulator database and can persist the database state between simulator runs
+- standalone-sql: a configuration that uses MariaDB for the simulator database and can persist the database state between simulator runs
 
 These configurations include all the setup and configuration for the
 OpenSimulator instance such as region names and locations.
@@ -73,7 +73,7 @@ git clone https://github.com/Misterblue/opensim-docker.git
 cd opensim-docker/opensim-standalone
 
 # Select the runtime configuration to use
-export CONFIG_NAME=standalone-mysql
+export CONFIG_NAME=standalone-sql
 
 # Create secrets
 cd config/$CONFIG_NAME

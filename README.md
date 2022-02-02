@@ -10,7 +10,7 @@ There was a presentation on this project at the
 that is available at
 [OSCC19 Dockerizing OpenSimulator](https://www.youtube.com/watch?v=-EnTepHqLA4) .
 
-This is organized into building *images* and *config*s for those images.
+This is organized into building *images* and having *config*s for those images.
 The model is for one to build a Docker image with one of the [OpenSimulator]
 images in it and, at runtime, choose one of the embedded configurations to
 run it with. The [OpenSimulator] "image" is a built version of the source
@@ -27,8 +27,9 @@ and environment. Additionally, if a database server is needed,
 that is also started and linked to the [OpenSimulator] instance.
 [MariaDB] is used for the external SQL server.
 
-As an example, to create a standalone version that creates two containers
-(simulator and database):
+As an example, to create an image of standard [OpenSimulator]
+and sets it up to run with a separate SQL database server to
+store data:
 
 ```
 # Get these configuration files
@@ -39,7 +40,7 @@ git clone https://github.com/Misterblue/opensim-docker.git
 cd opensim-docker/image-opensim
 
 # Select the runtime configuration to use
-export CONFIG_NAME=standalone-mysql
+export CONFIG_NAME=standalone-sql
 
 # Create secrets
 cd config/$CONFIG_NAME
@@ -62,15 +63,27 @@ cd opensim-docker/image-opensim
 CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
 ```
 
+Notice that nearly all of the configuration of the running OpenSimulator
+is done in the `misc.ini` file. All the configurations from the OpenSimulator
+sources and the defaults that are in the source repository and these values
+are overlayed by the last INI file which, in this case, is `misc.ini`.
+
 As of January 2022, these [Docker] images have not been built and uploaded
 anywhere as you will probably want to be using the latest [OpenSimulator]
 sources and thus require a fresh build.
 
-## Image Configuration
+## Image Operation
 
 The `Dockerfile`s setup the image with a few scripts to configure and start
 [OpenSimulator], periodically check for crashes, copy crash'ed log files,
 and restart the simulator if it's not running.
+
+Which configuration is used is specified by environment variables which 
+must be set. The environment variables are:
+
+-- *CONFIG_NAME*: the configuration to use (like "standalone" or "standalone-sql")
+-- *CONFIGKEY*: the password for extracting secrets in .crypt files
+-- *EXTERNAL_HOSTNAME*: the external network address for the simulator
 
 The container starts the script `/home/opensim/bootOpenSim.sh` which runs
 configuration scripts and then starts the simulator. There are other scripts
@@ -106,6 +119,50 @@ with these sources or one could mount a volume on top of `/home/opensim/opensim/
 and completely replace all the configuration files. This enables the flexibility
 of either building configuration within the [Docker] image or supplying one's
 own configuration at runtime.
+
+## Running the Docker Image
+
+Once the Docker image is built, it can be run with a command like:
+
+```
+CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+```
+
+Once started, a `docker ps` will show something like:
+
+<pre>
+$ docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED          STATUS          PORTS                                                                                                                                                                                                                                                              NAMES
+368b0137d30c   opensim-opensim   "/home/opensim/bootO…"   25 minutes ago   Up 25 minutes   0.0.0.0:8002->8002/tcp, 0.0.0.0:8002->8002/udp, :::8002->8002/tcp, :::8002->8002/udp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/tcp, :::9000->9000/udp, 0.0.0.0:9010->9010/tcp, 0.0.0.0:9010->9010/udp, :::9010->9010/tcp, :::9010->9010/udp   opensim-standalone_opensim_1
+6637e8548a0f   mariadb:latest    "docker-entrypoint.s…"   25 minutes ago   Up 25 minutes   3306/tcp                                                                                                                                                                                                                                                           opensim-standalone_dbservice_1
+$ 
+</pre>
+
+Which shows the two containers started for the simulator and the database. (There will be only one container if using the SqlLite database.)
+
+The number under "CONTAINER ID" is and ID one uses to address the container. The command
+
+```
+docker logs ID
+```
+
+will show the console output when starting the container. The configuration scripts output messages that will help finding any problems.
+
+To get a console on the OpenSimulator container, the command is
+
+```
+docker exec -it ID /bin/bash
+```
+
+(that is, execute and interactive command on the container). This will open a Bash shell on the container.
+
+OpenSimulator is started with Screen. Once running the Bash shell on the container, the command:
+
+```
+screen -r OpenSimScreen
+```
+
+will connect you to the OpenSimulator console.
 
 [OpenSimulator]: https://opensimulator.org
 [Docker]: https://www.docker.com
