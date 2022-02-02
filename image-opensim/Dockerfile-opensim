@@ -1,0 +1,105 @@
+# OpenSim for a container
+#   docker build -t opensim-standalone .
+
+FROM mono:6
+
+LABEL Description="Docker container running OpenSimulator"
+
+ENV OPENSIMDIR=/home/opensim/opensim
+ENV VERSIONDIR=/home/opensim/VERSION
+
+# Arguments passed in so they can be embedded in the built image
+ARG BUILD_DATE
+ARG BUILD_DAY
+ARG OS_DOCKER_VERSION
+ARG OS_DOCKER_GIT_BRANCH
+ARG OS_DOCKER_GIT_COMMIT
+ARG OS_DOCKER_GIT_COMMIT_SHORT
+
+# Arguments for fetching OpenSimulator
+ARG OS_REPO=git://opensimulator.org/git/opensim
+ARG OS_BRANCH=master
+
+# Include required packages ('coreutils git vim' included for debugging)
+#  (20220127 using MariaDB as Mono image built on Debian 10)
+RUN apt-get update \
+    && apt-get install -y \
+        coreutils procps git vim \
+        screen \
+        ccrypt \
+        cron \
+        mariadb-client \
+        sqlite \
+    && rm -rf /var/lib/apt/lists/*
+
+# The simulator is run under the user name 'opensim'
+RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
+
+USER opensim:opensim
+
+# Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
+COPY --chown=opensim:opensim temp-run-scripts/*.sh /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/crontab /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/.vimrc /home/opensim/
+
+# Version information that goes in the image
+RUN mkdir -p $VERSIONDIR \
+    && cd $VERSIONDIR \
+    && echo $BUILD_DATE > "BUILD_DATE" \
+    && echo $BUILD_DAY > "BUILD_DAY" \
+    && echo $OS_DOCKER_VERSION > "OS_DOCKER_VERSION" \
+    && echo $OS_DOCKER_GIT_BRANCH > "OS_DOCKER_GIT_BRANCH" \
+    && echo $OS_DOCKER_GIT_COMMIT > "OS_DOCKER_GIT_COMMIT" \
+    && echo $OS_DOCKER_GIT_COMMIT_SHORT > "OS_DOCKER_GIT_COMMIT_SHORT" \
+    && echo ${OS_DOCKER_VERSION}-${BUILD_DAY}-${OS_DOCKER_GIT_COMMIT_SHORT} > "OS_DOCKER_IMAGE_VERSION"
+
+# Fetch the latest version of the OpenSimulator sources.
+RUN cd /home/opensim \
+    && git clone --depth=1 $OS_REPO opensim \
+    && cd $OPENSIMDIR \
+    && git checkout $OS_BRANCH
+
+# Extract version information from the fetched sources
+RUN cd $OPENSIMDIR \
+    && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
+    && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
+    && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
+        sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
+
+# Build OpenSimulator
+RUN cd $OPENSIMDIR \
+    && chmod +x runprebuild48.sh \
+    && ./runprebuild48.sh \
+    && msbuild
+
+# OpenSim.ini and other INI files include from "config-include/*"
+#     so copy an empty versions to nullfy the default configuration.
+RUN cd $OPENSIMDIR/bin \
+    && /home/opensim/nullOutConfigInclude.sh
+
+# Copy the configuration file sets for this image
+RUN mkdir -p $OPENSIMDIR/bin/config
+COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
+# Use the default, included configuration parameters
+RUN cp $OPENSIMDIR/bin/OpenSim.ini.example $OPENSIMDIR/bin/OpenSim.ini
+
+# Remove the run supression flag. If this file exists, OpenSim is not started by the run script.
+RUN rm -f $OPENSIMDIR/../NOOPENSIM
+
+WORKDIR $OPENSIMDIR/bin
+ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
+
+# No ports are exposed by default since the simulator and regions can be anywhere.
+# The simulator defaults to port 9000.
+# EXPOSE 9000/tcp
+# EXPOSE 9000/udp
+
+# Directories that can be overridden with a mounted volume for configuration.
+# The default configuration is for a simple standalone region.
+# All the normal configuration has been nulled out (OpenSim.ini is the default
+#    and all the included files in bin/config-include are empty).
+#    A non-standalone configuration replaces bin/config with files that do
+#    the configuration of the whole system (include 'architecture' ini file and
+#    the necessary other INI files).
+VOLUME $OPENSIMDIR/bin/config
+
