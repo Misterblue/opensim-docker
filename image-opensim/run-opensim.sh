@@ -31,13 +31,13 @@ unset OPENSIMBIN
 # Use the generic docker-compose file or the one specific to the configuration if it exists
 cd "$BASE"
 COMPOSEFILE=./docker-compose.yml
-if [[ -e "config/$CONFIG_NAME/docker-compose.yml" ]] ; then
-    COMPOSEFILE="config/$CONFIG_NAME/docker-compose.yml"
+if [[ -e "config/config-${CONFIG_NAME}/docker-compose.yml" ]] ; then
+    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
 fi
 
 # Local directory for storage of sql persistant data (so region
 #    contents persists between container restarts).
-# This must be the same directory as in $CONFIG_NAME/docker-compose.yml.
+# This must be the same directory as in config-$CONFIG_NAME/docker-compose.yml.
 if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
     mkdir -p "$HOME/opensim-sql-data"
     chmod o+w "$HOME/opensim-sql-data"

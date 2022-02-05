@@ -28,7 +28,7 @@ the Docker image is started. `setup.sh` uses `os-config` to define the environme
 variable `CONFIG_NAME` and then uses the information in the same named sub-directory
 to setup the configuration files for [OpenSimulator].
 
-`bin/config/$CONFIG_NAME/Includes.ini` is copied into `bin/config`. This will be read
+`bin/config/config-$CONFIG_NAME/Includes.ini` is copied into `bin/config`. This will be read
 by [OpenSimulator] on startup and replaces all of the usual configuration includes.
 There will usually be a `bin/config/$CONFIG_NAME/config-includes` that models the
 usual [OpenSimulator] configuration directory.

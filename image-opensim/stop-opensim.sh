@@ -14,8 +14,8 @@ unset OPENSIMBIN
 # Use the generic docker-compose file or the one specific to the configuration if it exists
 cd "$BASE"
 COMPOSEFILE=./docker-compose.yml
-if [[ -e "config/$CONFIG_NAME/docker-compose.yml" ]] ; then
-    COMPOSEFILE="config/$CONFIG_NAME/docker-compose.yml"
+if [[ -e "config/config-${CONFIG_NAME}/docker-compose.yml" ]] ; then
+    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
 fi
 
 echo "Stopping configuration $CONFIG_NAME from \"$COMPOSEFILE\""

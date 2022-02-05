@@ -22,8 +22,8 @@ if [[ ! -z "$MYSQL_ROOT_PASSWORD" ]] ; then
         fi
     done
 
-    SQLCMDS=${OPENSIMCONFIG}/mymy$$
-    SQLOPTIONS=${OPENSIMCONFIG}/mymyoptions$$
+    SQLCMDS=/tmp/mymy$$
+    SQLOPTIONS=tmp/mymyoptions$$
     rm -f "$SQLCMDS"
     rm -f "$SQLOPTIONS"
 

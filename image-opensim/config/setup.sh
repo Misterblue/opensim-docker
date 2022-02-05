@@ -31,9 +31,9 @@ fi
 # Since all the regular configuration has been nulled out, this will be the only config
 #    after bin/OpenSimDefaults.ini and bin/OpenSim.ini
 cd "$CONFIGDIR"
-if [[ -e "${CONFIG_NAME}/Includes.ini" ]] ; then
+if [[ -e "config-${CONFIG_NAME}/Includes.ini" ]] ; then
     echo "opensim-docker: setup.sh: Copying \"${CONFIG_NAME}/Includes.ini\""
-    cp "${CONFIG_NAME}/Includes.ini" .
+    cp "config-${CONFIG_NAME}/Includes.ini" .
 fi
 
 echo "opensim-docker: setup.sh: CONFIG_NAME=${CONFIG_NAME}"
