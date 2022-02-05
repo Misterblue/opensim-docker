@@ -6,17 +6,12 @@
 #    running things.
 
 # Be sure to set environment variables:
-#    CONFIGKEY=passwordForCryptFile
+#    CONFIGKEY=passwordForCryptFile (optional. Not needed if os-secrets is not ccrypt'ed)
 #    CONFIG_NAME=nameOfRunConfiguration (default 'standalone' of not supplied)
 #    EXTERNAL_HOSTNAME=IPorDNSnameForSimulator
 
 BASE=$(pwd)
 
-if [[ -z "$CONFIGKEY" ]] ; then
-    echo "Configuration password environment variable CONFIGKEY is not set."
-    echo "NOT STARTING!"
-    exit 3
-fi
 if [[ -z "$EXTERNAL_HOSTNAME" ]] ; then
     echo "Environment variable EXTERNAL_HOSTNAME is not set."
     echo "NOT STARTING!"
@@ -43,8 +38,9 @@ fi
 # Local directory for storage of sql persistant data (so region
 #    contents persists between container restarts).
 # This must be the same directory as in $CONFIG_NAME/docker-compose.yml.
-if [[ ! -d "$HOME/mysql-data" ]] ; then
-    mkdir -p "$HOME/mysql-data"
+if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
+    mkdir -p "$HOME/opensim-sql-data"
+    chmod o+w "$HOME/opensim-sql-data"
 fi
 
 docker-compose \

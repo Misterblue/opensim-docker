@@ -16,17 +16,22 @@ services:
         volumes:
             # NOTE: you must create this directory before starting the simulator
             # This mysql data directory can be placed anywhere
-            - ~/mysql-data:/var/lib/mysql
+            - ~/opensim-sql-data:/var/lib/mysql
         # restart: always
 
     opensim:
         depends_on:
             - dbservice
         image: opensim-opensim
+
         environment:
             CONFIG_NAME:
             CONFIGKEY:
             EXTERNAL_HOSTNAME:
+
+        volumes:
+            - ./config:/home/opensim/opensim/bin/config
+
         ports:
             - 8002:8002/tcp
             - 8002:8002/udp
@@ -36,4 +41,5 @@ services:
             - 9010:9010/udp
         links:
             - dbservice:dbservice
+
         # restart: always

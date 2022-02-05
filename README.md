@@ -36,18 +36,17 @@ store data:
 cd
 git clone https://github.com/Misterblue/opensim-docker.git
 
-# Use the standalone setup for this example
+# Use the regular OpenSimulator with a standalone setup for this example:
 cd opensim-docker/image-opensim
 
 # Select the runtime configuration to use
 export CONFIG_NAME=standalone-sql
 
-# Create secrets
+# Edit os-secrets with login and database passwords
 cd config/$CONFIG_NAME
-cp ../os-secrets tmpfile
-# Edit 'tmpfile' with secrets (MYSQL root password, etc)
-ccrypt -e -K secretPassword < tmpfile > os-secrets.crypt
-rm tmpfile
+# Edit "config/$CONFIG_NAME/os-secrets"
+# If you want to keep things hidden, one can follow the instructions in os-secrets
+#     and encrypt os-secrets.
 
 # Do any additional OpenSimulator configuration
 # Edit 'config/$CONFIG_NAME/Regions/Regions.ini for region location
@@ -68,8 +67,10 @@ is done in the `misc.ini` file. All the configurations from the OpenSimulator
 sources and the defaults that are in the source repository and these values
 are overlayed by the last INI file which, in this case, is `misc.ini`.
 
-As of January 2022, these [Docker] images have not been built and uploaded
-anywhere as you will probably want to be using the latest [OpenSimulator]
+By default, the [Docker] image that is run is the local built image.
+Optionally, one can use an image in a remote repository.
+Most people will build their own local image, though,
+as you will probably want to be using the latest [OpenSimulator]
 sources and thus require a fresh build.
 
 ## Image Operation
@@ -82,7 +83,7 @@ Which configuration is used is specified by environment variables which
 must be set. The environment variables are:
 
 -- *CONFIG_NAME*: the configuration to use (like "standalone" or "standalone-sql")
--- *CONFIGKEY*: the password for extracting secrets in .crypt files
+-- *CONFIGKEY*: (optional) the password for extracting secrets in .crypt files
 -- *EXTERNAL_HOSTNAME*: the external network address for the simulator
 
 The container starts the script `/home/opensim/bootOpenSim.sh` which runs
@@ -114,6 +115,12 @@ a separate directory. In general,
 - the files in `config-include` are emptied so they don't do anything when included by any script
 - configuration uses the feature that [OpenSimulator] reads all the INI files in `bin/config`
 
+The latter feature is used by `config/setup.sh` which copies a `$CONFIG_NAME/Include.ini`
+into `bin/config` and that is what includes all the necessary configuration files in
+the `$CONFIG_NAME` directory.
+
+`docker-compose` mounts the container's `bin/config` directory as the `config/`
+directory so all of the configuration of the 
 The latter feature means that one could either use the configuration samples included
 with these sources or one could mount a volume on top of `/home/opensim/opensim/bin/config`
 and completely replace all the configuration files. This enables the flexibility
@@ -162,7 +169,7 @@ OpenSimulator is started with Screen. Once running the Bash shell on the contain
 screen -r OpenSimScreen
 ```
 
-will connect you to the OpenSimulator console.
+will connect you to the OpenSimulator console. *TO EXIT SCREEN* the command is `cntl-A` followed by `cntl-D`.
 
 [OpenSimulator]: https://opensimulator.org
 [Docker]: https://www.docker.com

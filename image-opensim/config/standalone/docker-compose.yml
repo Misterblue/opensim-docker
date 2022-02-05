@@ -2,12 +2,16 @@ version: '3'
 
 services:
     opensim:
+
         image: opensim-opensim
 
         environment:
-            CONFIGKEY:
-            CONFIG_NAME:
-            EXTERNAL_HOSTNAME:
+            - CONFIGKEY
+            - CONFIG_NAME
+            - EXTERNAL_HOSTNAME
+
+        volumes:
+            - ./config:/home/opensim/opensim/bin/config
 
         ports:
             - 8002:8002/tcp
