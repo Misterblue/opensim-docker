@@ -37,6 +37,7 @@ export OPENSIMBIN=$BASE
 if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
     echo "opensim-docker: running configuration file initialization"
     config/scripts/updateConfigFiles.sh
+    config/scripts/linkInConfigs.sh
 else
     echo "opensim-docker: delaying configuration file initialization to configuration start"
     # Just set the configuration variables into the environment
