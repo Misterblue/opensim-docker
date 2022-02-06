@@ -29,9 +29,8 @@ services:
             CONFIGKEY:
             EXTERNAL_HOSTNAME:
 
-        # If the configuration is outside the container.
-        # volumes:
-        #     - ./config:/home/opensim/opensim/bin/config
+        volumes:
+            - ./config:/home/opensim/opensim/bin/config
 
         ports:
             - 8002:8002/tcp

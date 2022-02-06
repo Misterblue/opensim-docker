@@ -10,6 +10,13 @@
 #    CONFIG_NAME=nameOfRunConfiguration (default 'standalone' of not supplied)
 #    EXTERNAL_HOSTNAME=IPorDNSnameForSimulator
 
+# If this environment variable is defined, the configuration files are updated with
+#    configuration values in the container (at container runtime). Otherwise, the
+#    configuration files are updated with values external to the container (in the
+#    filesystem of the invoker and the internal directory 'bin/config/ is mounted
+#    as the local 'config' directory.
+# export OS_DOCKER_CONTAINER_CONFIG="yes"
+
 BASE=$(pwd)
 
 if [[ -z "$EXTERNAL_HOSTNAME" ]] ; then
@@ -25,14 +32,23 @@ export CONFIG_NAME=${CONFIG_NAME:-standalone}
 # This export fakes out the environment setup script to look for files in
 #    build environment rather than in run environment.
 export OPENSIMBIN=$BASE
-source config/scripts/setEnvironment.sh
-unset OPENSIMBIN
+
+# if configuration files are external to the container, run the configuration
+if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
+    echo "opensim-docker: running configuration file initialization"
+    config/scripts/updateConfigFiles.sh
+else
+    echo "opensim-docker: delaying configuration file initialization to configuration start"
+    # Just set the configuration variables into the environment
+    source config/scripts/setEnvironment.sh
+fi
 
 # Use the generic docker-compose file or the one specific to the configuration if it exists
 cd "$BASE"
-COMPOSEFILE=./docker-compose.yml
-if [[ -e "config/config-${CONFIG_NAME}/docker-compose.yml" ]] ; then
-    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
+COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
+if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
+    # if using external configuration, include docker-compose with the mount
+    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
 fi
 
 # Local directory for storage of sql persistant data (so region

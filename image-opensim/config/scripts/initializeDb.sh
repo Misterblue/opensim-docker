@@ -23,7 +23,7 @@ if [[ ! -z "$MYSQL_ROOT_PASSWORD" ]] ; then
     done
 
     SQLCMDS=/tmp/mymy$$
-    SQLOPTIONS=tmp/mymyoptions$$
+    SQLOPTIONS=/tmp/mymyoptions$$
     rm -f "$SQLCMDS"
     rm -f "$SQLOPTIONS"
 

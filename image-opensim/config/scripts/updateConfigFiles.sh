@@ -7,7 +7,7 @@ OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
 
 # For this image, CONFIG_NAME is the configuration being used
 CONFIG_NAME=${CONFIG_NAME:-standalone}
-CONFIGDIR=${OPENSIMBIN}/config/${CONFIG_NAME}
+CONFIGDIR=${OPENSIMBIN}/config/config-${CONFIG_NAME}
 
 cd "$CONFIGDIR"
 source ../scripts/setEnvironment.sh
