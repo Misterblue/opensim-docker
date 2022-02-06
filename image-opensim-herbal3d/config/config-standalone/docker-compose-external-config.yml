@@ -2,12 +2,17 @@ version: '3'
 
 services:
     opensim:
+
         image: opensim-herbal3d
 
         environment:
-            CONFIGKEY:
-            CONFIG_NAME:
-            EXTERNAL_HOSTNAME:
+            - CONFIGKEY
+            - CONFIG_NAME
+            - EXTERNAL_HOSTNAME
+
+        # If the configuration is outside of the container
+        # volumes:
+        #     - ./config:/home/opensim/opensim/bin/config
 
         ports:
             - 8002:8002/tcp

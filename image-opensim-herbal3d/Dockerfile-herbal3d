@@ -1,66 +1,97 @@
 # OpenSim with Herbal3d region modules
 #   docker build -t opensim-herbal3d .
 
-FROM mono:6 as built
-# FROM mono:5 as built
-# FROM mono:4.6 as built
+FROM mono:6
 
-LABEL Version="0.1"
 LABEL Description="Docker container running OpenSimulator with Herbal3d extensions"
 
 ENV OPENSIMDIR=/home/opensim/opensim
+ENV VERSIONDIR=/home/opensim/VERSION
+
+# Arguments passed in so they can be embedded in the built image
+ARG BUILD_DATE
+ARG BUILD_DAY
+ARG OS_DOCKER_VERSION
+ARG OS_DOCKER_GIT_BRANCH
+ARG OS_DOCKER_GIT_COMMIT
+ARG OS_DOCKER_GIT_COMMIT_SHORT
+
+# Arguments for fetching OpenSimulator
+ARG OS_REPO=git://opensimulator.org/git/opensim
+ARG OS_BRANCH=master
 
 # Include required packages ('coreutils git vim' included for debugging)
+#  (20220127 using MariaDB as Mono image built on Debian 10)
 RUN apt-get update \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
         ccrypt \
         cron \
-        mysql-client \
+        mariadb-client \
         sqlite \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # The simulator is run under the user name 'opensim'
-# (From https://stackoverflow.com/questions/27701930/add-user-to-docker-container)
 RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
 
 USER opensim:opensim
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=opensim:opensim scripts/* /home/opensim/
-COPY --chown=opensim:opensim vimrc /home/opensim/.vimrc
+COPY --chown=opensim:opensim temp-run-scripts/*.sh /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/crontab /home/opensim/
+COPY --chown=opensim:opensim temp-run-scripts/.vimrc /home/opensim/
 
-# Fetch and build the latest version of the OpenSimulator sources.
-# This includes a lot of steps so we can delete the sources and git files
-#    to make the resulting layer small.
+# Version information that goes in the image
+RUN mkdir -p $VERSIONDIR \
+    && cd $VERSIONDIR \
+    && echo $BUILD_DATE > "BUILD_DATE" \
+    && echo $BUILD_DAY > "BUILD_DAY" \
+    && echo $OS_DOCKER_VERSION > "OS_DOCKER_VERSION" \
+    && echo $OS_DOCKER_GIT_BRANCH > "OS_DOCKER_GIT_BRANCH" \
+    && echo $OS_DOCKER_GIT_COMMIT > "OS_DOCKER_GIT_COMMIT" \
+    && echo $OS_DOCKER_GIT_COMMIT_SHORT > "OS_DOCKER_GIT_COMMIT_SHORT" \
+    && echo ${OS_DOCKER_VERSION}-${BUILD_DAY}-${OS_DOCKER_GIT_COMMIT_SHORT} > "OS_DOCKER_IMAGE_VERSION"
+
+# Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
-    && git clone git://opensimulator.org/git/opensim \
+    && git clone --depth=1 $OS_REPO opensim \
     && cd $OPENSIMDIR/addon-modules/ \
-    && git clone https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
-    && git clone https://github.com/Herbal3d/HerbalTransportCS.git \
-    && git clone https://github.com/Herbal3d/Loden.git \
-    && git clone https://github.com/Herbal3d/OSAuthModule.git \
-    && git clone https://github.com/Herbal3d/RaguOS.git \
-    && mkdir -p $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/Loden/config/Loden.ini $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/RaguOS/config/RaguOS.ini $OPENSIMDIR/bin/config \
-    && cp $OPENSIMDIR/addon-modules/OSAuthModule/config/OSAuth.ini $OPENSIMDIR/bin/config \
+    && git clone --depth=1 https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
+    && git clone --depth=1 https://github.com/Herbal3d/HerbalTransportCS.git \
+    && git clone --depth=1 https://github.com/Herbal3d/Loden.git \
+    && git clone --depth=1 https://github.com/Herbal3d/OSAuthModule.git \
+    && git clone --depth=1 https://github.com/Herbal3d/RaguOS.git \
     && cd $OPENSIMDIR \
-    && ./runprebuild.sh \
-    && nuget restore OpenSim.sln \
-    && cp -f packages/*/lib/net45/* bin \
-    && msbuild \
-    && cd $OPENSIMDIR \
-    && rm -rf $OPENSIMDIR/OpenSim \
-    && rm -rf $OPENSIMDIR/addon-modules
+    && git checkout $OS_BRANCH
 
+# Extract version information from the fetched sources
+RUN cd $OPENSIMDIR \
+    && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
+    && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
+    && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
+        sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
+
+# Build OpenSimulator
+RUN cd $OPENSIMDIR \
+    && chmod +x runprebuild48.sh \
+    && ./runprebuild48.sh \
+    && nuget restore OpenSim.sln \
+    && msbuild
+
+# OpenSim.ini and other INI files include from "config-include/*"
+#     so copy an empty versions to nullfy the default configuration.
+RUN cd $OPENSIMDIR/bin \
+    && /home/opensim/nullOutConfigInclude.sh
+
+# Copy the configuration file sets for this image
+RUN mkdir -p $OPENSIMDIR/bin/config
+COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
 # Use the default, included configuration parameters
 RUN cp $OPENSIMDIR/bin/OpenSim.ini.example $OPENSIMDIR/bin/OpenSim.ini
-# OpenSim.ini does an include of "config-include/Standalone.ini".
-#     so copy an empty version to nullfy the default configuration.
-COPY --chown=opensim:opensim config-include/ $OPENSIMDIR/bin/config-include/
-COPY --chown=opensim:opensim config/ $OPENSIMDIR/bin/config/
+
+# Remove the run supression flag. If this file exists, OpenSim is not started by the run script.
+RUN rm -f $OPENSIMDIR/../NOOPENSIM
 
 WORKDIR $OPENSIMDIR/bin
 ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]

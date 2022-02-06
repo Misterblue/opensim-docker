@@ -30,7 +30,7 @@ RUN apt-get update \
         cron \
         mariadb-client \
         sqlite \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # The simulator is run under the user name 'opensim'
 RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
