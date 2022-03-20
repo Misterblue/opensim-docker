@@ -3,7 +3,6 @@
 
 docker build \
     --pull \
-    --no-cache \
-    -t basiljs-herbal3d \
-    -f Dockerfile-basiljs \
+    -t basil-herbal3d \
+    -f Dockerfile-basil \
     .

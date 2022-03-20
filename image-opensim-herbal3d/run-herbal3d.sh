@@ -60,6 +60,8 @@ if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
     chmod o+w "$HOME/opensim-sql-data"
 fi
 
+# https://docs.docker.com/engine/security/userns-remap/
+# --userns-remap="opensim:opensim"
 docker-compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-herbal3d \

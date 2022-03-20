@@ -13,8 +13,9 @@ GIT_COMMIT_SHORT=$(git rev-parse --short HEAD)
 rm -rf temp-run-scripts
 cp -r ../run-scripts temp-run-scripts
 
-# Note that the '--no-cache' is here to force refetching of the OpenSimulator git sources
+# Note that the '--no-cache' can be added force refetching of the OpenSimulator git sources
 #    --no-cache
+# As of 20220320, the Prebuild needed for Herbal3d is in a branch (setting of OS_BRANCH)
 docker build \
     --build-arg BUILD_DATE=$BUILD_DATE \
     --build-arg BUILD_DAY=$BUILD_DAY \
@@ -22,6 +23,7 @@ docker build \
     --build-arg OS_DOCKER_GIT_BRANCH=$GIT_BRANCH \
     --build-arg OS_DOCKER_GIT_COMMIT=$GIT_COMMIT \
     --build-arg OS_DOCKER_GIT_COMMIT_SHORT=$GIT_COMMIT_SHORT \
+    --build-arg OS_BRANCH=prebuildnet6 \
     -t opensim-herbal3d \
     -f Dockerfile-herbal3d \
     .

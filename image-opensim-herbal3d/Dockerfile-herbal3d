@@ -55,15 +55,14 @@ RUN mkdir -p $VERSIONDIR \
 
 # Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
-    && git clone --depth=1 $OS_REPO opensim \
+    && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim \
     && cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 https://github.com/Herbal3d/HerbalCommonUtilCS.git \
     && git clone --depth=1 https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
     && git clone --depth=1 https://github.com/Herbal3d/HerbalTransportCS.git \
     && git clone --depth=1 https://github.com/Herbal3d/Loden.git \
     && git clone --depth=1 https://github.com/Herbal3d/OSAuthModule.git \
-    && git clone --depth=1 https://github.com/Herbal3d/RaguOS.git \
-    && cd $OPENSIMDIR \
-    && git checkout $OS_BRANCH
+    && git clone --depth=1 https://github.com/Herbal3d/RaguOS.git
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
