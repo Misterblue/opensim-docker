@@ -8,7 +8,7 @@ LABEL Description="Docker container running OpenSimulator with Herbal3d extensio
 ENV OPENSIMDIR=/home/opensim/opensim
 ENV VERSIONDIR=/home/opensim/VERSION
 
-# Arguments passed in so they can be embedded in the built image
+# This builder information passed in so they can be embedded in the built image
 ARG BUILD_DATE
 ARG BUILD_DAY
 ARG OS_DOCKER_VERSION
@@ -20,9 +20,18 @@ ARG OS_DOCKER_GIT_COMMIT_SHORT
 ARG OS_REPO=git://opensimulator.org/git/opensim
 ARG OS_BRANCH=master
 
+# Each of the different packages can have their branch over-ridden with a --build-arg
+ARG COMMON_ENTITIES_BRANCH=master
+ARG COMMON_UTIL_BRANCH=main
+ARG TRANSPORT_BRANCH=master
+ARG LODEN_BRANCH=master
+ARG OSAUTH_BRANCH=master
+ARG RAGU_BRANCH=master
+
 # Include required packages ('coreutils git vim' included for debugging)
 #  (20220127 using MariaDB as Mono image built on Debian 10)
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
@@ -55,15 +64,31 @@ RUN mkdir -p $VERSIONDIR \
 
 # Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
-    && git clone --depth=1 $OS_REPO opensim \
-    && cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 https://github.com/Herbal3d/HerbalCommonEntitiesCS.git \
-    && git clone --depth=1 https://github.com/Herbal3d/HerbalTransportCS.git \
-    && git clone --depth=1 https://github.com/Herbal3d/Loden.git \
-    && git clone --depth=1 https://github.com/Herbal3d/OSAuthModule.git \
-    && git clone --depth=1 https://github.com/Herbal3d/RaguOS.git \
-    && cd $OPENSIMDIR \
-    && git checkout $OS_BRANCH
+    && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
+
+ADD https://api.github.com/repos/Herbal3d/HerbalCommonEntitiesCS/git/refs/heads/$COMMON_ENTITES_BRANCH commonentites-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $COMMON_ENTITIES_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonEntitiesCS.git
+
+ADD https://api.github.com/repos/Herbal3d/HerbalCommonUtilCS/git/refs/heads/$COMMON_UTIL_BRANCH commonutil-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $COMMON_UTIL_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonUtilCS.git
+
+ADD https://api.github.com/repos/Herbal3d/HerbalTransportCS/git/refs/heads/$TRANSPORT_BRANCH transport-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $TRANSPORT_BRANCH --single-branch https://github.com/Herbal3d/HerbalTransportCS.git
+
+ADD https://api.github.com/repos/Herbal3d/Loden/git/refs/heads/$LODEN_BRANCH loden-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $LODEN_BRANCH --single-branch https://github.com/Herbal3d/Loden.git
+
+ADD https://api.github.com/repos/Herbal3d/OSAuthModule/git/refs/heads/$OSAUTH_BRANCH osauth-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $OSAUTH_BRANCH --single-branch https://github.com/Herbal3d/OSAuthModule.git
+
+ADD https://api.github.com/repos/Herbal3d/Ragu/git/refs/heads/$RAGU_BRANCH ragu-git-version.json
+RUN cd $OPENSIMDIR/addon-modules/ \
+    && git clone --depth=1 -b $RAGU_BRANCH --single-branch https://github.com/Herbal3d/RaguOS.git
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \

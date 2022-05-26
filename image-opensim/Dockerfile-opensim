@@ -55,9 +55,7 @@ RUN mkdir -p $VERSIONDIR \
 
 # Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
-    && git clone --depth=1 $OS_REPO opensim \
-    && cd $OPENSIMDIR \
-    && git checkout $OS_BRANCH
+    && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
