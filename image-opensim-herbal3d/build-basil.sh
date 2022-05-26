@@ -1,8 +1,8 @@
 #! /bin/bash
-# Build docker image for sourcing BasilJS
+# Build docker image for sourcing Basilts
 
 docker build \
     --pull \
-    -t basilts-herbal3d \
-    -f Dockerfile-basiljs \
+    -t basil-herbal3d \
+    -f Dockerfile-basil \
     .
