@@ -23,7 +23,6 @@ docker build \
     --build-arg OS_DOCKER_GIT_BRANCH=$GIT_BRANCH \
     --build-arg OS_DOCKER_GIT_COMMIT=$GIT_COMMIT \
     --build-arg OS_DOCKER_GIT_COMMIT_SHORT=$GIT_COMMIT_SHORT \
-    --build-arg OS_BRANCH=prebuildnet6 \
     -t opensim-herbal3d \
     -f Dockerfile-herbal3d \
     .
