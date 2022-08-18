@@ -19,9 +19,10 @@ if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
     COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
 fi
 
-echo "Stopping configuration $CONFIG_NAME from \"$COMPOSEFILE\""
+
+echo "Restarting configuration $CONFIG_NAME from \"$COMPOSEFILE\""
 
 docker-compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-${CONFIG_NAME} \
-    down
+    restart

@@ -1,5 +1,5 @@
 #! /bin/bash
-# Run the default Docker image using the standalone configuration.
+# Run the OpenSimulator image
 
 # Since the initial run has to create and initialize the MYSQL database
 #    the first time, this sets the passwords into the environment before
@@ -33,15 +33,18 @@ export CONFIG_NAME=${CONFIG_NAME:-standalone}
 #    build environment rather than in run environment.
 export OPENSIMBIN=$BASE
 
+# set all environment variables
+echo "Setting environment vars"
+source config/scripts/setEnvironment.sh
+# echo "================================"
+# env | sort
+# echo "================================"
+
 # if configuration files are external to the container, run the configuration
 if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
     echo "opensim-docker: running configuration file initialization"
     config/scripts/updateConfigFiles.sh
     config/scripts/linkInConfigs.sh
-else
-    echo "opensim-docker: delaying configuration file initialization to configuration start"
-    # Just set the configuration variables into the environment
-    source config/scripts/setEnvironment.sh
 fi
 
 # Use the generic docker-compose file or the one specific to the configuration if it exists
@@ -51,18 +54,22 @@ if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
     # if using external configuration, include docker-compose with the mount
     COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
 fi
+echo "Docker-compose file: ${COMPOSEFILE}"
 
 # Local directory for storage of sql persistant data (so region
 #    contents persists between container restarts).
 # This must be the same directory as in config-$CONFIG_NAME/docker-compose.yml.
 if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
+    echo "Directory \"$HOME/opensim-sql-data/\" does not exist. Creating same."
     mkdir -p "$HOME/opensim-sql-data"
     chmod o+w "$HOME/opensim-sql-data"
 fi
 
+# https://docs.docker.com/engine/security/userns-remap/
+# --userns-remap="opensim:opensim"
 docker-compose \
     --file "$COMPOSEFILE" \
-    --project-name opensim-standalone \
+    --project-name opensim-${CONFIG_NAME} \
     --project-directory "$BASE" \
     up \
     --detach

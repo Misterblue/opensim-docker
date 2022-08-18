@@ -32,8 +32,8 @@ fi
 echo "opensim-docker: updateConfigFiles.sh: replacing vars in \"${CONFIGDIR}/misc.ini\""
 # If the replacement has already happened, this is a NOOP
 sed --in-place \
-    -e "s/MYSQL_DB_USER/$MYSQL_DB_USER/" \
     -e "s/MYSQL_DB_USER_PASSWORD/$MYSQL_DB_USER_PASSWORD/" \
+    -e "s/MYSQL_DB_USER/$MYSQL_DB_USER/" \
     -e "s/MYSQL_DB_SOURCE/$MYSQL_DB_SOURCE/" \
     -e "s/MYSQL_DB_DB/$MYSQL_DB_DB/" \
     -e "s/PW_FOR_DEFAULT_ESTATE_OWNER/$PW_FOR_DEFAULT_ESTATE_OWNER/" \

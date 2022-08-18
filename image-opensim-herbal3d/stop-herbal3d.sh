@@ -13,14 +13,15 @@ unset OPENSIMBIN
 
 # Use the generic docker-compose file or the one specific to the configuration if it exists
 cd "$BASE"
-COMPOSEFILE=./docker-compose.yml
-if [[ -e "config/config-${CONFIG_NAME}/docker-compose.yml" ]] ; then
-    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
+COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
+if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
+    # if external configuration, include docker-compose with the mount
+    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
 fi
 
 echo "Stopping configuration $CONFIG_NAME from \"$COMPOSEFILE\""
 
 docker-compose \
     --file "$COMPOSEFILE" \
-    --project-name opensim-standalone \
+    --project-name opensim-${CONFIG_NAME} \
     down
