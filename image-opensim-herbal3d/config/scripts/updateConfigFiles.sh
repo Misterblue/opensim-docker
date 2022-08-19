@@ -31,7 +31,7 @@ fi
 # If the environment variables haven't been copied into misc.ini, do it now
 echo "opensim-docker: updateConfigFiles.sh: replacing vars in \"${CONFIGDIR}/misc.ini\""
 # If the replacement has already happened, this is a NOOP
-sed --in-place \
+sed \
     -e "s/MYSQL_DB_USER_PASSWORD/$MYSQL_DB_USER_PASSWORD/" \
     -e "s/MYSQL_DB_USER/$MYSQL_DB_USER/" \
     -e "s/MYSQL_DB_SOURCE/$MYSQL_DB_SOURCE/" \
@@ -39,6 +39,6 @@ sed --in-place \
     -e "s/PW_FOR_DEFAULT_ESTATE_OWNER/$PW_FOR_DEFAULT_ESTATE_OWNER/" \
     -e "s/DEFAULT_ESTATE_NAME/$DEFAULT_ESTATE_NAME/" \
     -e "s/DEFAULT_ESTATE_OWNER/$DEFAULT_ESTATE_OWNER/" \
-    "${CONFIGDIR}/misc.ini"
+    < "${CONFIGDIR}/misc.ini.ORIG" > "${CONFIGDIR}/misc.ini"
 
 
