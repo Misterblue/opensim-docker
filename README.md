@@ -59,7 +59,7 @@ cd opensim-docker/image-opensim
 ./build-opensim.sh
 
 # Run the composed container set
-CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+CONFIG_NAME=standalone-sql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
 ```
 
 Notice that nearly all of the configuration of the running OpenSimulator
@@ -132,7 +132,7 @@ own configuration at runtime.
 Once the Docker image is built, it can be run with a command like:
 
 ```
-CONFIG_NAME=standalone-mysql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+CONFIG_NAME=standalone-sql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
 ```
 
 Once started, a `docker ps` will show something like:
