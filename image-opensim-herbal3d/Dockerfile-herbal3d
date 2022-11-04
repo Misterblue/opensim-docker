@@ -1,10 +1,11 @@
 # OpenSim with Herbal3d region modules
 #   docker build -t opensim-herbal3d .
 
-FROM mono:6
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
 
 LABEL Description="Docker container running OpenSimulator with Herbal3d extensions"
 
+ENV BASEDIR=/home/opensim
 ENV OPENSIMDIR=/home/opensim/opensim
 ENV VERSIONDIR=/home/opensim/VERSION
 
@@ -18,15 +19,15 @@ ARG OS_DOCKER_GIT_COMMIT_SHORT
 
 # Arguments for fetching OpenSimulator
 ARG OS_REPO=git://opensimulator.org/git/opensim
-ARG OS_BRANCH=master
+ARG OS_BRANCH=dotnet6
 
 # Each of the different packages can have their branch over-ridden with a --build-arg
-ARG COMMON_ENTITIES_BRANCH=master
+ARG COMMON_ENTITIES_BRANCH=dotnet6
 ARG COMMON_UTIL_BRANCH=main
 ARG TRANSPORT_BRANCH=master
-ARG LODEN_BRANCH=master
-ARG OSAUTH_BRANCH=master
-ARG RAGU_BRANCH=master
+ARG LODEN_BRANCH=dotnet6
+ARG OSAUTH_BRANCH=dotnet6
+ARG RAGU_BRANCH=dotnet6
 
 # Include required packages ('coreutils git vim' included for debugging)
 #  (20220127 using MariaDB as Mono image built on Debian 10)
@@ -66,29 +67,45 @@ RUN mkdir -p $VERSIONDIR \
 RUN cd /home/opensim \
     && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
 
-ADD https://api.github.com/repos/Herbal3d/HerbalCommonEntitiesCS/git/refs/heads/$COMMON_ENTITES_BRANCH commonentites-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $COMMON_ENTITIES_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonEntitiesCS.git
 
-ADD https://api.github.com/repos/Herbal3d/HerbalCommonUtilCS/git/refs/heads/$COMMON_UTIL_BRANCH commonutil-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $COMMON_UTIL_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonUtilCS.git
 
-ADD https://api.github.com/repos/Herbal3d/HerbalTransportCS/git/refs/heads/$TRANSPORT_BRANCH transport-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $TRANSPORT_BRANCH --single-branch https://github.com/Herbal3d/HerbalTransportCS.git
 
-ADD https://api.github.com/repos/Herbal3d/Loden/git/refs/heads/$LODEN_BRANCH loden-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $LODEN_BRANCH --single-branch https://github.com/Herbal3d/Loden.git
 
-ADD https://api.github.com/repos/Herbal3d/OSAuthModule/git/refs/heads/$OSAUTH_BRANCH osauth-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $OSAUTH_BRANCH --single-branch https://github.com/Herbal3d/OSAuthModule.git
 
-ADD https://api.github.com/repos/Herbal3d/Ragu/git/refs/heads/$RAGU_BRANCH ragu-git-version.json
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $RAGU_BRANCH --single-branch https://github.com/Herbal3d/RaguOS.git
+
+# The Herbal3d images have a special version building tool
+RUN cd $BASEDIR \
+    && git clone --depth=1 -b main --single-branch https://github.com/Herbal3d/BuildVersion.git \
+    && cd BuildVersion \
+    && dotnet build --configuration Debug BuildVersion.sln
+ENV BUILDVERSION=$BASEDIR/BuildVersion/bin/Debug/net6.0/BuildVersion
+RUN cd $OPENSIMDIR/addon-modules/HerbalCommonEntitiesCS/CommonEntities \
+    && chmod +x updateVersion.sh \
+    && ./updateVersion.sh $BUILDVERSION
+RUN cd $OPENSIMDIR/addon-modules/HerbalCommonEntitiesCS/CommonEntitiesConv \
+    && chmod +x updateVersion.sh \
+    && ./updateVersion.sh $BUILDVERSION
+RUN cd $OPENSIMDIR/addon-modules/HerbalTransportCS \
+    && chmod +x updateVersion.sh \
+    && ./updateVersion.sh $BUILDVERSION
+RUN cd $OPENSIMDIR/addon-modules/Loden \
+    && chmod +x updateVersion.sh \
+    && ./updateVersion.sh $BUILDVERSION
+RUN cd $OPENSIMDIR/addon-modules/RaguOS \
+    && chmod +x updateVersion.sh \
+    && ./updateVersion.sh $BUILDVERSION
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
@@ -99,10 +116,16 @@ RUN cd $OPENSIMDIR \
 
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \
-    && chmod +x runprebuild48.sh \
-    && ./runprebuild48.sh \
-    && nuget restore OpenSim.sln \
-    && msbuild
+    && chmod +x runprebuild.sh \
+    && ./runprebuild.sh \
+    && dotnet restore OpenSim.sln \
+    && dotnet build --configuration Release OpenSim.sln
+
+# The NuGet DLLs are not copied into the bin directory.
+# TODO: Figure out why NuGet packages are not copied.
+RUN cp $BASEDIR/.nuget/packages/fleck/1.2.0/lib/netstandard2.0/Fleck.dll $OPENSIMDIR/bin
+RUN cp $BASEDIR/.nuget/packages/newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll $OPENSIMDIR/bin
+RUN cp $BASEDIR/.nuget/packages/nlog/4.7.15/lib/netstandard2.0/NLog.dll $OPENSIMDIR/bin
 
 # OpenSim.ini and other INI files include from "config-include/*"
 #     so copy an empty versions to nullfy the default configuration.
