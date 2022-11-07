@@ -22,6 +22,9 @@ if [[ ! -z "$MYSQL_ROOT_PASSWORD" ]] ; then
         fi
     done
 
+    # set a default for the account (downward compatibility)
+    export MYSQL_ROOT_ACCOUNT=${MYSQL_ROOT_ACCOUNT:-root}
+
     SQLCMDS=/tmp/mymy$$
     SQLOPTIONS=/tmp/mymyoptions$$
     rm -f "$SQLCMDS"
@@ -36,7 +39,7 @@ quit
 EOFFFF
     cat > "$SQLOPTIONS" <<EOFFFF
 [client]
-user=root
+user=$MYSQL_ROOT_ACCOUNT
 password=$MYSQL_ROOT_PASSWORD
 host=$MYSQL_DB_SOURCE
 EOFFFF

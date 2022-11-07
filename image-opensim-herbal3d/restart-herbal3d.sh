@@ -22,7 +22,15 @@ fi
 
 echo "Restarting configuration $CONFIG_NAME from \"$COMPOSEFILE\""
 
+# update any of the images
+# docker-compose \
+#     --file "$COMPOSEFILE" \
+#     pull
+
 docker-compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-${CONFIG_NAME} \
-    restart
+    --project-directory "$BASE" \
+    up \
+    --detach \
+    --remove-orphans

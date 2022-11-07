@@ -1,0 +1,46 @@
+
+version: '3'
+
+services:
+
+    dbservice:
+        image: mariadb:latest
+        environment:
+            MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        # Parameters added to invocation.
+        # Default is to flush after every operation which slows Docker image down.
+        # This flushes log once a second.
+        command: --innodb_flush_log_at_trx_commit=2 --sync_binlog=0
+        volumes:
+            # NOTE: you must create this directory before starting the simulator
+            # This mysql data directory can be placed anywhere
+            - /root/opensim-sql-data:/var/lib/mysql
+        restart: unless-stopped
+
+    opensim:
+        depends_on:
+            - dbservice
+        image: opensim-herbal3d
+
+        environment:
+            CONFIG_NAME:
+            CONFIGKEY:
+            EXTERNAL_HOSTNAME:
+
+        volumes:
+            # overlay the OpenSimulator bin/config/ with external config/
+            - ./config:/home/opensim/opensim/bin/config
+            # Loden generated asset directory tree is stored externally
+            - /root/LodenAssets:/home/opensim/opensim/bin/LodenAssets
+
+        ports:
+            - 8002:8002/tcp
+            - 9000:9000/tcp
+            - 9050-9060:9050-9060/udp
+            - 11400-11410:11400-11410/tcp
+            - 11440:11440/tcp
+
+        links:
+            - dbservice:dbservice
+
+        restart: unless-stopped

@@ -40,6 +40,7 @@ RUN apt-get update \
         cron \
         mariadb-client \
         sqlite \
+        libgdiplus \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # The simulator is run under the user name 'opensim'
@@ -113,6 +114,9 @@ RUN cd $OPENSIMDIR \
     && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
     && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
         sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
+
+# Use the proper drawing library
+RUN cp $OPENSIMDIR/bin/System.Drawing.Common.dll.linux $OPENSIMDIR/bin/System.Drawing.Common.dll
 
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \

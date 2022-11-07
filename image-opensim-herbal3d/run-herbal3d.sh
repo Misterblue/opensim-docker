@@ -34,7 +34,8 @@ export CONFIG_NAME=${CONFIG_NAME:-standalone}
 export OPENSIMBIN=$BASE
 
 # set all environment variables
-echo "Setting environemtn vars"
+echo "Setting environment vars"
+cd "$BASE"
 source config/scripts/setEnvironment.sh
 # echo "================================"
 # env | sort
@@ -43,6 +44,7 @@ source config/scripts/setEnvironment.sh
 # if configuration files are external to the container, run the configuration
 if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
     echo "opensim-docker: running configuration file initialization"
+    cd "$BASE"
     config/scripts/updateConfigFiles.sh
     config/scripts/linkInConfigs.sh
 fi

@@ -1,10 +1,11 @@
 # OpenSim for a container
 #   docker build -t opensim-standalone .
 
-FROM mono:6
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
 
 LABEL Description="Docker container running OpenSimulator"
 
+ENV BASEDIR=/home/opensim
 ENV OPENSIMDIR=/home/opensim/opensim
 ENV VERSIONDIR=/home/opensim/VERSION
 
@@ -18,7 +19,7 @@ ARG OS_DOCKER_GIT_COMMIT_SHORT
 
 # Arguments for fetching OpenSimulator
 ARG OS_REPO=git://opensimulator.org/git/opensim
-ARG OS_BRANCH=master
+ARG OS_BRANCH=dotnet6
 
 # Include required packages ('coreutils git vim' included for debugging)
 #  (20220127 using MariaDB as Mono image built on Debian 10)
@@ -67,8 +68,8 @@ RUN cd $OPENSIMDIR \
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \
     && chmod +x runprebuild48.sh \
-    && ./runprebuild48.sh \
-    && msbuild
+    && ./runprebuild.sh \
+    && dotnet build --configuration Release OpenSim.sln
 
 # OpenSim.ini and other INI files include from "config-include/*"
 #     so copy an empty versions to nullfy the default configuration.
