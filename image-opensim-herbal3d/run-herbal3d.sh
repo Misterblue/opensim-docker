@@ -69,7 +69,7 @@ fi
 
 # https://docs.docker.com/engine/security/userns-remap/
 # --userns-remap="opensim:opensim"
-docker-compose \
+docker compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-${CONFIG_NAME} \
     --project-directory "$BASE" \
