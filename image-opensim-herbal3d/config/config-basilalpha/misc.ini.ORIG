@@ -46,14 +46,13 @@
 
 [Groups]
     Enabled = true
-    Module = "Groups Module V2"
+    Module = GroupsModule
+    ServicesConnectorModule = XmlRpcGroupsServicesConnector
     GroupsServerURI = "http://groups.osgrid.org/xmlrpc.php"
-    MessagingModule = "Groups Messaging Module V2"
-    ServicesConnectorModule = "Groups HG Service Connector"
-    LocalService = remote
-    HomeURI = "${Const|BaseURL}:${Const|PublicPort}"
 
     NoticesEnabled = true
+
+    MessagingModule = GroupsMessagingModule
     MessagingEnabled = true
     MessageOnlineUsersOnly = true
 
@@ -126,8 +125,8 @@
     GridUserServerURI = "http://users.osgrid.org"
 [AuthenticationService]
     AuthenticationServerURI = "http://login.osgrid.org"
-[FriendService]
-    FriendServerURI = "http://friends.osgrid.org"
+[FriendsService]
+    FriendsServerURI = "http://friends.osgrid.org"
 
 [HGInventoryAccessModule]
     HomeURI = "http://hg.osgrid.org:80"
