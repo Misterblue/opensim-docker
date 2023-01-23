@@ -67,7 +67,7 @@ RUN cd $OPENSIMDIR \
 
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \
-    && chmod +x runprebuild48.sh \
+    && chmod +x runprebuild.sh \
     && ./runprebuild.sh \
     && dotnet build --configuration Release OpenSim.sln
 
