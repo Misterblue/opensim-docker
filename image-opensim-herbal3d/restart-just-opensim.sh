@@ -22,7 +22,7 @@ fi
 
 echo "Restarting configuration $CONFIG_NAME from \"$COMPOSEFILE\""
 
-docker-compose \
+docker compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-${CONFIG_NAME} \
     restart -t 10 opensim

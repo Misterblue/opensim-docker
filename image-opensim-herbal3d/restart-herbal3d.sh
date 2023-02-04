@@ -27,7 +27,7 @@ echo "Restarting configuration $CONFIG_NAME from \"$COMPOSEFILE\""
 #     --file "$COMPOSEFILE" \
 #     pull
 
-docker-compose \
+docker compose \
     --file "$COMPOSEFILE" \
     --project-name opensim-${CONFIG_NAME} \
     --project-directory "$BASE" \
