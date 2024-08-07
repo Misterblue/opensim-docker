@@ -1,16 +1,14 @@
 #! /bin/bash
 # Check to see if OpenSim is running and restart if it is not
 
-OPENSIMHOME=${OPENSIMHOME:-/home/opensim}
-OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
+export OPENSIMHOME=${OPENSIMHOME:-/home/opensim}
+export OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
 
 CRASHLOG=${OPENSIMHOME}/crashlog.log
 HDR="$(date +%Y%m%d%H%M):"
 
 LASTCRASH=${OPENSIMHOME}/.lastCrash
 TIMEAGO=${OPENSIMHOME}/.lastTimeAgo
-
-cd
 
 if [[ -e "${OPENSIMHOME}/NOOPENSIM" ]] ; then
 	exit 5

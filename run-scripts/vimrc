@@ -1,3 +1,4 @@
+" file copied to /home/opensim/.vimrc
 set tabstop=4
 set shiftwidth=4
 set expandtab

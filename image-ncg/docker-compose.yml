@@ -1,0 +1,42 @@
+
+version: '3'
+
+networks:
+    localnet:
+        driver: bridge
+
+services:
+    dbservice:
+        # Use MariaDB
+        image: mariadb:latest
+        environment:
+            MYSQL_ROOT_PASSWORD:
+        # Parameters added to invocation.
+        # Default is to flush after every operation which slows Docker image down.
+        # This flushes log once a second.
+        command: --innodb_flush_log_at_trx_commit=2 --sync_binlog=0
+        volumes:
+            # NOTE: you must create this directory before starting the simulator
+            # This mysql data directory can be placed anywhere
+            - ~/opensim-sql-data:/var/lib/mysql
+        networks:
+            - localnet
+        # restart: always
+
+    opensim:
+        depends_on:
+            - dbservice
+        image: opensim-ncg
+        environment:
+            OS_CONFIG: standalone
+        volumes:
+            - ./config-$OS_CONFIG:/home/opensim/opensim/bin/config
+        networks:
+            - localnet
+        ports:
+            - 9000:9000/tcp
+            - 9000:9000/udp
+            - 9010:9010/tcp
+            - 9010:9010/udp
+
+        # restart: always

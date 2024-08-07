@@ -1,0 +1,2 @@
+If this file exists in /home/opensim, OpenSimulator will not be started.
+Create this file to disable the periodic restart test operation.

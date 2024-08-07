@@ -1,0 +1,27 @@
+# Overall parameters for building and storing the OpenSimulator image.
+# This file is 'source'ed in Bash scripts and used by docker-compose.
+
+# While nearly everything can be moved into this file, these are the
+#    top level build and run configurations but most of the configuration
+#    happens in the config-$OS_CONFIG directory.
+
+# NOTE: the assignment format is restricted so it works as a Bash
+#    assignment file and a docker-compose env-file
+
+# The sources to build
+OS_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
+OS_BRANCH=develop
+# OS_BRANCH=opensim-rel-0.9.3.8940
+OS_BUILDTARGET=Release
+OS_SLN=OpenSim.sln
+
+# The container parameters
+IMAGE_OWNER=misterblue
+IMAGE_NAME=opensim-ncg
+IMAGE_VERSION=${OS_BRANCH}
+DOCKER_IMAGE="${IMAGE_OWNER}/${IMAGE_NAME}:${IMAGE_VERSION}"
+
+# The directory "config-$OS_CONFIG" is mounted inside the container
+#    at /home/opensim/opensim/bin/config. This is the directory that
+#    OpenSimulator reads all the .ini and .xml files from.
+OS_CONFIG=standalone

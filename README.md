@@ -11,13 +11,19 @@ that is available at
 [OSCC19 Dockerizing OpenSimulator](https://www.youtube.com/watch?v=-EnTepHqLA4) .
 
 This is organized into building *images* and having *config*s for those images.
+
 The model is for one to build a Docker image with one of the [OpenSimulator]
-images in it and, at runtime, choose one of the embedded configurations to
+images in it and, at runtime, choose one of the configurations to
 run it with. The [OpenSimulator] "image" is a built version of the source
 code and the "config" is the collection of INI files that are used to run it.
 
-Two images are currently present: `image-opensim` which is a built of the
-straight [OpenSimulator] 'master' branch,
+The images have no configuration in them. In the image, most of the .ini files
+have been nulled out. Configuration is completely specified by mounting
+a configuration directory when the [Docker] image is run.
+
+Three images are currently present:
+`image-ncg` which is a built of the [NCG] 'develop' branch,
+`image-opensim` which is a built of the straight [OpenSimulator] 'master' branch,
 and `image-opensim-herbal3d` which is [OpenSimulator] built with
 the [Herbal3d] addon modules.
 (Since I'm the Herbal3d main developer, this is how I test it.)
@@ -111,21 +117,20 @@ with the base [OpenSimulator] sources and to replace them with copies in
 a separate directory. In general,
 
 - `OpenSimDefaults.ini` is used unchanged from  the sources
-- `OpenSim.ini.example` is copied to `OpenSim.ini` with no changes
+- `OpenSim.ini.example` is not used and is ignored
 - the files in `config-include` are emptied so they don't do anything when included by any script
-- configuration uses the feature that [OpenSimulator] reads all the INI files in `bin/config`
+- configuration uses the feature that [OpenSimulator] reads all the INI files from
+  a specified directory (default is ./bin/config). This directory is mounted
+  to a directory external to the [Docker] container and based on the `CONFIG_NAME`.
 
-The latter feature is used by `config/setup.sh` which copies a `$CONFIG_NAME/Include.ini`
-into `bin/config` and that is what includes all the necessary configuration files in
-the `$CONFIG_NAME` directory.
+In the mounted configuration directory, the file `setup.sh` is run before [OpenSimulator]
+is started to do any setup.
 
 `docker-compose` mounts the container's `bin/config` directory as the `config/`
-directory so all of the configuration of the 
-The latter feature means that one could either use the configuration samples included
-with these sources or one could mount a volume on top of `/home/opensim/opensim/bin/config`
-and completely replace all the configuration files. This enables the flexibility
-of either building configuration within the [Docker] image or supplying one's
-own configuration at runtime.
+directory so all configuration is loaded from the external directory.
+This means that a complete configuration must be created outside the Docker
+container.
+Many examples are given.
 
 ## Running the Docker Image
 
@@ -175,4 +180,5 @@ will connect you to the OpenSimulator console. *TO EXIT SCREEN* the command is `
 [Docker]: https://www.docker.com
 [Herbal3d]: https://www.herbal3d.org
 [MariaDB]: https://mariadb.org/
+[NCG]: https://github.com/OpenSim-NGC/OpenSim-Sasquatch
 
