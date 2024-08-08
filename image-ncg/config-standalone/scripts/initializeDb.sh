@@ -49,7 +49,7 @@ host=$MYSQL_DB_HOST
 EOFFFF
 
     # If the database is started at the same time, what for it to initialize
-    until mysql --defaults-extra-file=$SQLOPTIONS -e "show databases" ; do
+    until mysql --defaults-extra-file=$SQLOPTIONS -e "show databases" > /dev/null ; do
         echo "opensim-docker: initializeDb.sh: Waiting on database to be ready"
         sleep 2
     done

@@ -14,7 +14,7 @@ echo "opensim-docker: setup.sh: OPENSIMCONFIG=\"${OPENSIMCONFIG}\""
 FIRSTTIMEFLAG=${HOME}/.configFirstTime
 
 cd "$OPENSIMCONFIG"
-# This sets CONFIG_NAME which is the configuration subdirectory (like standalone)
+# This sets CONFIG_NAME which is the configuration subdirectory
 source ./scripts/setEnvironment.sh
 
 # If this is the first time run, do database setup and some one-time configuration updates

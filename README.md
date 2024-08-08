@@ -45,19 +45,20 @@ git clone https://github.com/Misterblue/opensim-docker.git
 # Use the regular OpenSimulator with a standalone setup for this example:
 cd opensim-docker/image-opensim
 
-# Select the runtime configuration to use
-export CONFIG_NAME=standalone-sql
+# Edit the file `env` with parameters for the container to be built. In
+#    particular, specify which configuration to use (`OS_CONFIG`)
 
-# Edit os-secrets with login and database passwords
-cd config/$CONFIG_NAME
-# Edit "config/$CONFIG_NAME/os-secrets"
+cd config-$OS_CONFIG
+
+# Edit "os-secrets" with login and database accounts and passwords
 # If you want to keep things hidden, one can follow the instructions in os-secrets
 #     and encrypt os-secrets.
 
 # Do any additional OpenSimulator configuration
-# Edit 'config/$CONFIG_NAME/Regions/Regions.ini for region location
-# Edit 'config/$CONFIG_NAME/misc.ini for other settings
-# Edit 'config'$CONFIG_NAME/config-include/*.ini for grid connections
+# Edit 'config-$OS_CONFIG/Include.ini for BaseHostname and server ports
+# Edit 'config-$OS_CONFIG/config-include/*.ini for grid connections
+# Edit 'config-$OS_CONFIG/Regions/Regions.ini for region location
+# Edit 'config-$OS_CONFIG/config-include/Final.ini for DatabaseService and other settings
 
 # Build OpenSimulator image
 cd
@@ -65,13 +66,13 @@ cd opensim-docker/image-opensim
 ./build-opensim.sh
 
 # Run the composed container set
-CONFIG_NAME=standalone-sql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+./run-opensim.sh
 ```
 
 Notice that nearly all of the configuration of the running OpenSimulator
-is done in the `misc.ini` file. All the configurations from the OpenSimulator
+is done in the `Final.ini` file. All the configurations from the OpenSimulator
 sources and the defaults that are in the source repository and these values
-are overlayed by the last INI file which, in this case, is `misc.ini`.
+are overlayed by the last INI file which, in this case, is `Final.ini`.
 
 By default, the [Docker] image that is run is the local built image.
 Optionally, one can use an image in a remote repository.
@@ -88,9 +89,8 @@ and restart the simulator if it's not running.
 Which configuration is used is specified by environment variables which 
 must be set. The environment variables are:
 
--- *CONFIG_NAME*: the configuration to use (like "standalone" or "standalone-sql")
--- *CONFIGKEY*: (optional) the password for extracting secrets in .crypt files
--- *EXTERNAL_HOSTNAME*: the external network address for the simulator
+-- *OS_CONFIG*: the configuration to use (like "standalone" or "standalone-sql")
+-- *OPENSIM_CONFIGKEY*: (optional) the password for extracting secrets in .crypt files
 
 The container starts the script `/home/opensim/bootOpenSim.sh` which runs
 configuration scripts and then starts the simulator. There are other scripts
@@ -121,7 +121,7 @@ a separate directory. In general,
 - the files in `config-include` are emptied so they don't do anything when included by any script
 - configuration uses the feature that [OpenSimulator] reads all the INI files from
   a specified directory (default is ./bin/config). This directory is mounted
-  to a directory external to the [Docker] container and based on the `CONFIG_NAME`.
+  to a directory external to the [Docker] container and based on the `OS_CONFIG`.
 
 In the mounted configuration directory, the file `setup.sh` is run before [OpenSimulator]
 is started to do any setup.
@@ -130,35 +130,48 @@ is started to do any setup.
 directory so all configuration is loaded from the external directory.
 This means that a complete configuration must be created outside the Docker
 container.
-Many examples are given.
 
 ## Running the Docker Image
 
 Once the Docker image is built, it can be run with a command like:
 
 ```
-CONFIG_NAME=standalone-sql CONFIGKEY=secretPassword EXTERNAL_HOSTNAME=whateverTheHostnameIs ./run-standalone.sh
+CONFIG_NAME=standalone CONFIGKEY=secretPassword ./run-opensim.sh
 ```
 
 Once started, a `docker ps` will show something like:
 
 <pre>
 $ docker ps
-CONTAINER ID   IMAGE             COMMAND                  CREATED          STATUS          PORTS                                                                                                                                                                                                                                                              NAMES
-368b0137d30c   opensim-opensim   "/home/opensim/bootO…"   25 minutes ago   Up 25 minutes   0.0.0.0:8002->8002/tcp, 0.0.0.0:8002->8002/udp, :::8002->8002/tcp, :::8002->8002/udp, 0.0.0.0:9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/tcp, :::9000->9000/udp, 0.0.0.0:9010->9010/tcp, 0.0.0.0:9010->9010/udp, :::9010->9010/tcp, :::9010->9010/udp   opensim-standalone_opensim_1
-6637e8548a0f   mariadb:latest    "docker-entrypoint.s…"   25 minutes ago   Up 25 minutes   3306/tcp                                                                                                                                                                                                                                                           opensim-standalone_dbservice_1
-$ 
+CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS         PORTS                                                                                                                                                                        NAMES
+36f4c81d8d22   opensim-ncg      "/home/opensim/bootO…"   6 seconds ago   Up 5 seconds   0.0.0.0:9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/tcp, :::9000->9000/udp, 0.0.0.0:9010->9010/tcp, 0.0.0.0:9010->9010/udp, :::9010->9010/tcp, :::9010->9010/udp   opensim-standalone-opensim-1
+5f550c90eebd   mariadb:latest   "docker-entrypoint.s…"   6 seconds ago   Up 5 seconds   3306/tcp                                                                                                                                                                     opensim-standalone-dbservice-1
 </pre>
 
-Which shows the two containers started for the simulator and the database. (There will be only one container if using the SqlLite database.)
+Which shows the two containers started for the simulator and the database.
 
 The number under "CONTAINER ID" is and ID one uses to address the container. The command
 
+The command `docker logs ID` will list the startup output when the container was started. An example:
+
 ```
-docker logs ID
+$ docker logs 36f4c81d8d22
+Starting OpenSimulator version 0.9.3.0
+   with opensim-docker version 4.0.1-20240806-62fda19
+   using configuration set ""
+opensim-docker: setup.sh: OPENSIMCONFIG="/home/opensim/opensim/bin/config"
+opensim-docker: setEnvironment.sh: trying plain text secrets
+opensim-docker: setEnvironment.sh: plain text secrets from "/home/opensim/opensim/bin/config/os-secrets"
+opensim-docker: setup.sh: first time
+opensim-docker: initializeDb.sh:
+ERROR 2002 (HY000): Can't connect to server on 'dbservice' (115)
+opensim-docker: initializeDb.sh: Waiting on database to be ready
+opensim-docker: initializeDb.sh: Database is ready
+opensim-docker: initialzeDb.sh: opensim database has already been created
+$
 ```
 
-will show the console output when starting the container. The configuration scripts output messages that will help finding any problems.
+The configuration scripts output messages that will help finding any problems.
 
 To get a console on the OpenSimulator container, the command is
 
@@ -166,7 +179,7 @@ To get a console on the OpenSimulator container, the command is
 docker exec -it ID /bin/bash
 ```
 
-(that is, execute and interactive command on the container). This will open a Bash shell on the container.
+(that is, execute an interactive command on the container). This will open a Bash shell on the container.
 
 OpenSimulator is started with Screen. Once running the Bash shell on the container, the command:
 
