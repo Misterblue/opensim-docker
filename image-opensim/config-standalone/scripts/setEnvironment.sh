@@ -5,29 +5,21 @@
 #     to get all the values for the configuration files.
 
 OPENSIMBIN=${OPENSIMBIN:-/home/opensim/opensim/bin}
+OPENSIMCONFIG=${OPENSIMCONFIG:-$OPENSIMBIN/config}
 
-OPENSIMCONFIG="$OPENSIMBIN/config"
 cd "$OPENSIMCONFIG"
-
-if [[ -e "./os-config" ]] ; then
-    source ./os-config
-    echo "opensim-docker: setEnvironment.sh: CONFIG_NAME=${CONFIG_NAME} from ./os-config"
-else
-    export CONFIG_NAME=${CONFIG_NAME:-standalone}
-    echo "opensim-docker: setEnvironment.sh: CONFIG_NAME=${CONFIG_NAME} as default"
-fi
 
 # See if we have encrypted secrets
 unset HAVE_SECRETS
-if [[ ! -z "$CONFIGKEY" ]] ; then
-    for secretsFile in $OPENSIMCONFIG/config-${CONFIG_NAME}/os-secrets.crypt $OPENSIMCONFIG/os-secrets.crypt ; do
+if [[ ! -z "$OPENSIM_CONFIGKEY" ]] ; then
+    for secretsFile in $OPENSIMCONFIG/os-secrets.crypt ; do
         if [[ -e "$secretsFile" ]] ; then
             echo "opensim-docker: setEnvironment.sh: have secrets file \"{$secretsFile}\""
-            source <(ccrypt -c -E CONFIGKEY "$secretsFile")
+            source <(ccrypt -c -E OPENSIM_CONFIGKEY "$secretsFile")
             HAVE_SECRETS=yes
             break;
         else
-            echo "opensim-docker: setEnvironment.sh: no secrets file"
+            echo "opensim-docker: setEnvironment.sh: no encrypted secrets file"
         fi
     done
 fi
@@ -35,7 +27,7 @@ fi
 # If no encrypted secrets, maybe unsecure plain-text secrets are available
 if [[ -z "$HAVE_SECRETS" ]] ; then
     echo "opensim-docker: setEnvironment.sh: trying plain text secrets"
-    for secretsFile in $OPENSIMCONFIG/config-${CONFIG_NAME}/os-secrets $OPENSIMCONFIG/os-secrets ; do
+    for secretsFile in $OPENSIMCONFIG/os-secrets ; do
         if [[ -e "$secretsFile" ]] ; then
             echo "opensim-docker: setEnvironment.sh: plain text secrets from \"${secretsFile}\""
             source "$secretsFile"

@@ -3,25 +3,16 @@
 
 BASE=$(pwd)
 
-export CONFIG_NAME=${CONFIG_NAME:-standalone}
+# Get the container parameters into the environment
+# source ./envToEnvironment.sh
+source ./env
 
-# This export fakes out the environment setup script to look for files in
-#    build environment rather than in run environment.
-export OPENSIMBIN=$BASE
-source config/scripts/setEnvironment.sh
-unset OPENSIMBIN
+export OS_CONFIG=${OS_CONFIG:-standalone}
 
-# Use the generic docker-compose file or the one specific to the configuration if it exists
-cd "$BASE"
-COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
-if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
-    # if using external configuration, include docker-compose with the mount
-    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
-fi
-
-echo "Stopping configuration $CONFIG_NAME from \"$COMPOSEFILE\""
+echo "Stopping configuration $OS_CONFIG from docker-compose.sh"
 
 docker-compose \
-    --file "$COMPOSEFILE" \
-    --project-name opensim-${CONFIG_NAME} \
+    --file docker-compose.yml \
+    --env-file ./env \
+    --project-name opensim-${OS_CONFIG} \
     down

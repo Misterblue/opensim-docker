@@ -1,41 +1,48 @@
+# syntax=docker/dockerfile:1
 # OpenSim for a container
-#   docker build -t opensim-standalone .
+#   docker build -t opensim .
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+# Built with dotnet8
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-LABEL Description="Docker container running OpenSimulator"
+LABEL Description="Docker container running OpenSim"
 
-ENV BASEDIR=/home/opensim
-ENV OPENSIMDIR=/home/opensim/opensim
-ENV VERSIONDIR=/home/opensim/VERSION
+# In the target image, these are directories built and used
+# While parameters, these usually don't change
+ARG OPENSIMHOME=/home/opensim
+ARG OPENSIMDIR=/home/opensim/opensim
+ARG OPENSIMCONFIG=/home/opensim/opensim/bin/config
+ARG VERSIONDIR=/home/opensim/VERSION
+ARG OS_ACCOUNT=opensim
 
-# Arguments passed in so they can be embedded in the built image
-ARG BUILD_DATE
-ARG BUILD_DAY
-ARG OS_DOCKER_VERSION
-ARG OS_DOCKER_GIT_BRANCH
-ARG OS_DOCKER_GIT_COMMIT
-ARG OS_DOCKER_GIT_COMMIT_SHORT
+# Arguments for fetching the proper version of OpenSimulator
+ARG OS_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
+ARG OS_BRANCH=develop
+ARG OS_BUILDTARGET=Release
+ARG OS_SLN=OpenSim.sln
 
-# Arguments for fetching OpenSimulator
-ARG OS_REPO=git://opensimulator.org/git/opensim
-ARG OS_BRANCH=master
+# Arguments about the build environment passed in so they can be embedded in the container
+ARG BUILD_DATE=20240101.0000
+ARG BUILD_DAY=20240101
+ARG OS_DOCKER_VERSION=1.0.0
+ARG OS_DOCKER_GIT_BRANCH=main
+ARG OS_DOCKER_GIT_COMMIT=62fda19d0038a274bf3fd922b023b149b3a40a90
+ARG OS_DOCKER_GIT_COMMIT_SHORT=62fda19d
 
 # Include required packages ('coreutils git vim' included for debugging)
-#  (20220127 using MariaDB as Mono image built on Debian 10)
 RUN apt-get update \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
         ccrypt \
-        cron \
-        mariadb-client \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}/
+        libgdiplus \
+        libc6-dev \
+        mariadb-client
 
 # The simulator is run under the user name 'opensim'
-RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
+RUN adduser --disabled-password --gecos 'OpenSimulator user' $OS_ACCOUNT
 
-USER opensim:opensim
+USER $OS_ACCOUNT:$OS_ACCOUNT
 
 # Version information that goes in the image
 RUN mkdir -p $VERSIONDIR \
@@ -49,13 +56,14 @@ RUN mkdir -p $VERSIONDIR \
     && echo ${OS_DOCKER_VERSION}-${BUILD_DAY}-${OS_DOCKER_GIT_COMMIT_SHORT} > "OS_DOCKER_IMAGE_VERSION"
 
 # Fetch the latest version of the OpenSimulator sources.
-RUN cd /home/opensim \
+RUN cd $OPENSIMHOME \
     && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
     && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
     && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
+    && echo $OS_BRANCH > $VERSIONDIR/OS_BRANCH \
     && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
         sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
 
@@ -63,42 +71,54 @@ RUN cd $OPENSIMDIR \
 RUN cd $OPENSIMDIR \
     && chmod +x runprebuild.sh \
     && ./runprebuild.sh \
-    && dotnet build --configuration Release OpenSim.sln
+    && dotnet build --configuration $OS_BUILDTARGET $OS_SLN
 
 # None of the configuration files in the built image are used
 # Configuration files are all specified by invocation parameter.
 
 # =======================================================================
-# Create the binary only container
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 as release
+# Create the binary only container with the dotnet8 runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS release
 
-ENV BASEDIR=/home/opensim
-ENV OPENSIMDIR=/home/opensim/opensim
-ENV VERSIONDIR=/home/opensim/VERSION
+# In the target image, these are directories built and used
+ARG OPENSIMHOME=/home/opensim
+ARG OPENSIMDIR=/home/opensim/opensim
+ARG VERSIONDIR=/home/opensim/VERSION
+ARG OS_BUILDTARGET=Release
+ARG OS_ACCOUNT=opensim
 
-# Include required packages ('coreutils git vim' included for debugging)
+# Include required packages ('coreutils,git,vim' included for debugging)
 RUN apt-get update \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
         ccrypt \
         cron \
+        libgdiplus \
+        libc6-dev \
         mariadb-client \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # The simulator is run under the user name 'opensim'
-RUN adduser --disabled-password --gecos 'OpenSimulator user' opensim
+RUN adduser --disabled-password --gecos 'OpenSimulator user' $OS_ACCOUNT
 
-USER opensim:opensim
+USER $OS_ACCOUNT:$OS_ACCOUNT
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=opensim:opensim temp-run-scripts/*.sh /home/opensim/
-COPY --chown=opensim:opensim temp-run-scripts/crontab /home/opensim/
-COPY --chown=opensim:opensim temp-run-scripts/vimrc /home/opensim/.vimrc
+COPY --chown=opensim:opensim temp-run-scripts/*.sh $OPENSIMHOME
+COPY --chown=opensim:opensim temp-run-scripts/crontab $OPENSIMHOME
+COPY --chown=opensim:opensim temp-run-scripts/vimrc $OPENSIMHOME/.vimrc
 
 # Copy the binary files
 COPY --from=build --chown=opensim:opensim $OPENSIMDIR/bin $OPENSIMDIR/bin
 COPY --from=build --chown=opensim:opensim $VERSIONDIR $VERSIONDIR
+
+# The .ini files in config-include in the image are not used and are emptied here to eliminate any confusion
+RUN cd $OPENSIMDIR/bin/config-include \
+    && $OPENSIMHOME/nullOutConfigInclude.sh
+
+# Create the directory that is mounted that includes all the configuration
+RUN mkdir -p $OPENSIMDIR/bin/config
 
 WORKDIR $OPENSIMDIR/bin
 ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
@@ -115,5 +135,5 @@ ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
 #    A non-standalone configuration replaces bin/config with files that do
 #    the configuration of the whole system (include 'architecture' ini file and
 #    the necessary other INI files).
-VOLUME $BASEDIR/config
+VOLUME $OPENSIMDIR/bin/config
 

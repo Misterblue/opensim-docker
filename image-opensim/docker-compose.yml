@@ -1,11 +1,13 @@
 
 version: '3'
 
-services:
+networks:
+    localnet:
+        driver: bridge
 
+services:
     dbservice:
-        # MySql version 8 requires a bunch of new security stuff. Stay with v5.
-        # image: mysql:5
+        # Use MariaDB
         image: mariadb:latest
         environment:
             MYSQL_ROOT_PASSWORD:
@@ -17,29 +19,24 @@ services:
             # NOTE: you must create this directory before starting the simulator
             # This mysql data directory can be placed anywhere
             - ~/opensim-sql-data:/var/lib/mysql
+        networks:
+            - localnet
         # restart: always
 
     opensim:
         depends_on:
             - dbservice
         image: opensim-opensim
-
         environment:
-            CONFIG_NAME:
-            CONFIGKEY:
-            EXTERNAL_HOSTNAME:
-
+            OS_CONFIG:
         volumes:
-            - ./config:/home/opensim/opensim/bin/config
-
+            - ./config-$OS_CONFIG:/home/opensim/opensim/bin/config
+        networks:
+            - localnet
         ports:
-            - 8002:8002/tcp
-            - 8002:8002/udp
             - 9000:9000/tcp
             - 9000:9000/udp
             - 9010:9010/tcp
             - 9010:9010/udp
-        links:
-            - dbservice:dbservice
 
         # restart: always

@@ -6,59 +6,20 @@
 #    running things.
 
 # Be sure to set environment variables:
-#    CONFIGKEY=passwordForCryptFile (optional. Not needed if os-secrets is not ccrypt'ed)
-#    CONFIG_NAME=nameOfRunConfiguration (default 'standalone' of not supplied)
-#    EXTERNAL_HOSTNAME=IPorDNSnameForSimulator
-
-# If this environment variable is defined, the configuration files are updated with
-#    configuration values in the container (at container runtime). Otherwise, the
-#    configuration files are updated with values external to the container (in the
-#    filesystem of the invoker and the internal directory 'bin/config/ is mounted
-#    as the local 'config' directory.
-# export OS_DOCKER_CONTAINER_CONFIG="yes"
+#    OS_CONFIG=nameOfRunConfiguration (default 'standalone' of not supplied)
 
 BASE=$(pwd)
 
-if [[ -z "$EXTERNAL_HOSTNAME" ]] ; then
-    echo "Environment variable EXTERNAL_HOSTNAME is not set."
-    echo "NOT STARTING!"
-    exit 3
-fi
+# Get the container parameters into the environment
+# source ./envToEnvironment.sh
+source ./env
 
-export CONFIGKEY=$CONFIGKEY
-export EXTERNAL_HOSTNAME=$EXTERNAL_HOSTNAME
-export CONFIG_NAME=${CONFIG_NAME:-standalone}
-
-# This export fakes out the environment setup script to look for files in
-#    build environment rather than in run environment.
-export OPENSIMBIN=$BASE
-
-# set all environment variables
-echo "Setting environment vars"
-source config/scripts/setEnvironment.sh
-# echo "================================"
-# env | sort
-# echo "================================"
-
-# if configuration files are external to the container, run the configuration
-if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
-    echo "opensim-docker: running configuration file initialization"
-    config/scripts/updateConfigFiles.sh
-    config/scripts/linkInConfigs.sh
-fi
-
-# Use the generic docker-compose file or the one specific to the configuration if it exists
-cd "$BASE"
-COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose.yml"
-if [[ -z "$OS_DOCKER_CONTAINER_CONFIG" ]] ; then
-    # if using external configuration, include docker-compose with the mount
-    COMPOSEFILE="config/config-${CONFIG_NAME}/docker-compose-external-config.yml"
-fi
-echo "Docker-compose file: ${COMPOSEFILE}"
+export OS_CONFIG=${OS_CONFIG:-standalone}
+echo "Using configuration \"$OS_CONFIG\""
 
 # Local directory for storage of sql persistant data (so region
 #    contents persists between container restarts).
-# This must be the same directory as in config-$CONFIG_NAME/docker-compose.yml.
+# This must be the same directory as in $COMPOSEFILE
 if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
     echo "Directory \"$HOME/opensim-sql-data/\" does not exist. Creating same."
     mkdir -p "$HOME/opensim-sql-data"
@@ -68,8 +29,8 @@ fi
 # https://docs.docker.com/engine/security/userns-remap/
 # --userns-remap="opensim:opensim"
 docker-compose \
-    --file "$COMPOSEFILE" \
-    --project-name opensim-${CONFIG_NAME} \
-    --project-directory "$BASE" \
+    --file docker-compose.yml \
+    --env-file ./env \
+    --project-name opensim-${OS_CONFIG} \
     up \
     --detach

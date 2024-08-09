@@ -1,8 +1,0 @@
-# File of configuration parameters that are applied when OpenSimulator is run.
-
-# When run, the OpenSimulator selects one of the available runtime configurations.
-# This is selected by CONFIG_NAME which is the name of a subdirectory under
-#     '/config/'. Thus, one OpenSImulator binary can have several runtime
-#     configurations (standalone, grid, ...).
-
-export CONFIG_NAME=${CONFIG_NAME:-standalone}

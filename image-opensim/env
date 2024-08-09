@@ -9,14 +9,14 @@
 #    assignment file and a docker-compose env-file
 
 # The sources to build
-OS_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
-OS_BRANCH=develop
+OS_REPO=git://opensimulator.org/git/opensim
+OS_BRANCH=master
 # OS_BRANCH=opensim-rel-0.9.3.8940
 OS_BUILDTARGET=Release
 OS_SLN=OpenSim.sln
 
 # The container parameters
 IMAGE_OWNER=misterblue
-IMAGE_NAME=opensim-ncg
+IMAGE_NAME=opensim-opensim
 IMAGE_VERSION=${OS_BRANCH}
 DOCKER_IMAGE="${IMAGE_OWNER}/${IMAGE_NAME}:${IMAGE_VERSION}"
