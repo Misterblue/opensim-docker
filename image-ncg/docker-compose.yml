@@ -28,7 +28,7 @@ services:
             - dbservice
         image: opensim-ncg
         environment:
-            OS_CONFIG: standalone
+            OS_CONFIG:
         volumes:
             - ./config-$OS_CONFIG:/home/opensim/opensim/bin/config
         networks:

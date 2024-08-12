@@ -8,7 +8,7 @@ export IMAGE_OWNER=${IMAGE_OWNER:-misterblue}
 export IMAGE_NAME=${IMAGE_NAME:-opensim-ncg}
 export IMAGE_VERSION=${IMAGE_VERSION:-latest}
 
-VERSIONLABEL=$(docker run --rm --entrypoint /home/opensim/getVersion.sh ${IMAGE_NAME}:${IMAGE_VERSION} OS_BRANCH)
+VERSIONLABEL=$(docker run --rm --entrypoint /home/opensim/getVersion.sh ${IMAGE_NAME}:${IMAGE_VERSION} OS_GIT_DESCRIBE)
 
 echo "Pushing docker image for opensim version ${VERSIONLABEL}"
 

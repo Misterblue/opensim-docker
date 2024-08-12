@@ -61,11 +61,14 @@ RUN cd $OPENSIMHOME \
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
-    && git rev-parse HEAD > $VERSIONDIR/OS_GIT_COMMIT \
-    && git rev-parse --short HEAD > $VERSIONDIR/OS_GIT_COMMIT_SHORT \
-    && echo $OS_BRANCH > $VERSIONDIR/OS_BRANCH \
+    && echo $OS_REPO > "$VERSIONDIR/OS_GIT_REPO" \
+    && echo $OS_BRANCH > "$VERSIONDIR/OS_GIT_BRANCH" \
+    && echo $OS_BUILDTARGET > "$VERSIONDIR/OS_BUILD_TARGET" \
+    && git describe --tags --long --always > "$VERSIONDIR/OS_GIT_DESCRIBE" \
+    && git rev-parse HEAD > "$VERSIONDIR/OS_GIT_COMMIT" \
+    && git rev-parse --short HEAD > "$VERSIONDIR/OS_GIT_COMMIT_SHORT" \
     && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
-        sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > $VERSIONDIR/OS_VERSION
+        sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > "$VERSIONDIR/OS_VERSION"
 
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \

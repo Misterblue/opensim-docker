@@ -18,5 +18,5 @@ OS_SLN=OpenSim.sln
 # The container parameters
 IMAGE_OWNER=misterblue
 IMAGE_NAME=opensim-opensim
-IMAGE_VERSION=${OS_BRANCH}
+IMAGE_VERSION=latest
 DOCKER_IMAGE="${IMAGE_OWNER}/${IMAGE_NAME}:${IMAGE_VERSION}"
