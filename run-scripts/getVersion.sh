@@ -17,7 +17,7 @@ for valueName in * ; do
 done
 
 if [[ -z "$part" ]] ; then
-    echo "${OS_VERSION}-${OS_BRANCH}-${OS_GIT_COMMIT_SHORT}-${BUILD_DATE}/${OS_DOCKER_IMAGE_VERSION}"
+    echo "${OS_VERSION}-${OS_GIT_BRANCH}-${OS_GIT_COMMIT_SHORT}-${BUILD_DATE}/${OS_DOCKER_IMAGE_VERSION}"
 else
     cat ${VERSIONDIR}/$part
 fi

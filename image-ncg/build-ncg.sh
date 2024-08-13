@@ -26,8 +26,8 @@ docker build \
     --build-arg OS_DOCKER_GIT_BRANCH=$OS_DOCKER_GIT_BRANCH \
     --build-arg OS_DOCKER_GIT_COMMIT=$OS_DOCKER_GIT_COMMIT \
     --build-arg OS_DOCKER_GIT_COMMIT_SHORT=$OS_DOCKER_GIT_COMMIT_SHORT \
-    --build-arg OS_REPO=$OS_REPO \
-    --build-arg OS_BRANCH=$OS_BRANCH \
+    --build-arg OS_GIT_REPO=$OS_GIT_REPO \
+    --build-arg OS_GIT_BRANCH=$OS_GIT_BRANCH \
     --build-arg OS_BUILDTARGET=$OS_BUILDTARGET \
     --build-arg OS_SLN=$OS_SLN \
     -t "$IMAGE_NAME" \

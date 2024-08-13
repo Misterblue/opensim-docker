@@ -15,7 +15,7 @@ cp -r ../run-scripts temp-run-scripts
 
 # Note that the '--no-cache' can be added force refetching of the OpenSimulator git sources
 #    --no-cache
-# As of 20220320, the Prebuild needed for Herbal3d is in a branch (setting of OS_BRANCH)
+# As of 20220320, the Prebuild needed for Herbal3d is in a branch (setting of OS_GIT_BRANCH)
 docker build \
     --build-arg BUILD_DATE=$BUILD_DATE \
     --build-arg BUILD_DAY=$BUILD_DAY \

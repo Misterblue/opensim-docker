@@ -11,6 +11,7 @@ services:
         image: mariadb:latest
         environment:
             MYSQL_ROOT_PASSWORD:
+            MARIADB_ROOT_PASSWORD:
         # Parameters added to invocation.
         # Default is to flush after every operation which slows Docker image down.
         # This flushes log once a second.

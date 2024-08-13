@@ -18,8 +18,8 @@ ARG OS_DOCKER_GIT_COMMIT
 ARG OS_DOCKER_GIT_COMMIT_SHORT
 
 # Arguments for fetching OpenSimulator
-ARG OS_REPO=git://opensimulator.org/git/opensim
-ARG OS_BRANCH=dotnet6
+ARG OS_GIT_REPO=git://opensimulator.org/git/opensim
+ARG OS_GIT_BRANCH=dotnet6
 
 # Each of the different packages can have their branch over-ridden with a --build-arg
 ARG COMMON_ENTITIES_BRANCH=dotnet6
@@ -66,7 +66,7 @@ RUN mkdir -p $VERSIONDIR \
 
 # Fetch the latest version of the OpenSimulator sources.
 RUN cd /home/opensim \
-    && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
+    && git clone --depth=1 -b $OS_GIT_BRANCH --single-branch $OS_GIT_REPO opensim
 
 RUN cd $OPENSIMDIR/addon-modules/ \
     && git clone --depth=1 -b $COMMON_ENTITIES_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonEntitiesCS.git

@@ -15,7 +15,7 @@ export OPENSIMCONFIG=$OPENSIMBIN/config
 
 # Start Opensim
 echo "Starting OpenSimulator version $(cat $VERSIONDIR/OS_VERSION)"
-echo "   built from branch $(cat $VERSIONDIR/OS_BRANCH)"
+echo "   built from branch $(cat $VERSIONDIR/OS_GIT_BRANCH)"
 echo "   with opensim-docker version $(cat $VERSIONDIR/OS_DOCKER_IMAGE_VERSION)"
 echo "   using configuration set \"$OS_CONFIG\""
 

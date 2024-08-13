@@ -14,8 +14,14 @@ BASE=$(pwd)
 # source ./envToEnvironment.sh
 source ./env
 
+# The selects the configuration to mount and use in the Docker image
 export OS_CONFIG=${OS_CONFIG:-standalone}
 echo "Using configuration \"$OS_CONFIG\""
+
+# Get the secrets for the environment
+# (the following 'export' fakes out 'setEnvironment' to use the local directory
+export OPENSIMCONFIG=${BASE}/config-${OS_CONFIG}
+source ${OPENSIMCONFIG}/scripts/setEnvironment.sh
 
 # Local directory for storage of sql persistant data (so region
 #    contents persists between container restarts).
@@ -25,6 +31,8 @@ if [[ ! -d "$HOME/opensim-sql-data" ]] ; then
     mkdir -p "$HOME/opensim-sql-data"
     chmod o+w "$HOME/opensim-sql-data"
 fi
+
+cd "${BASE}"
 
 # https://docs.docker.com/engine/security/userns-remap/
 # --userns-remap="opensim:opensim"

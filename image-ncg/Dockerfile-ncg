@@ -16,8 +16,8 @@ ARG VERSIONDIR=/home/opensim/VERSION
 ARG OS_ACCOUNT=opensim
 
 # Arguments for fetching the proper version of OpenSimulator
-ARG OS_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
-ARG OS_BRANCH=develop
+ARG OS_GIT_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
+ARG OS_GIT_BRANCH=develop
 ARG OS_BUILDTARGET=Release
 ARG OS_SLN=OpenSim.sln
 
@@ -57,12 +57,12 @@ RUN mkdir -p $VERSIONDIR \
 
 # Fetch the latest version of the NCG sources.
 RUN cd $OPENSIMHOME \
-    && git clone --depth=1 -b $OS_BRANCH --single-branch $OS_REPO opensim
+    && git clone --depth=1 -b $OS_GIT_BRANCH --single-branch $OS_GIT_REPO opensim
 
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
-    && echo $OS_REPO > "$VERSIONDIR/OS_GIT_REPO" \
-    && echo $OS_BRANCH > "$VERSIONDIR/OS_GIT_BRANCH" \
+    && echo $OS_GIT_REPO > "$VERSIONDIR/OS_GIT_REPO" \
+    && echo $OS_GIT_BRANCH > "$VERSIONDIR/OS_GIT_BRANCH" \
     && echo $OS_BUILDTARGET > "$VERSIONDIR/OS_BUILD_TARGET" \
     && git describe --tags --long --always > "$VERSIONDIR/OS_GIT_DESCRIBE" \
     && git rev-parse HEAD > "$VERSIONDIR/OS_GIT_COMMIT" \

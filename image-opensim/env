@@ -9,9 +9,9 @@
 #    assignment file and a docker-compose env-file
 
 # The sources to build
-OS_REPO=git://opensimulator.org/git/opensim
-OS_BRANCH=master
-# OS_BRANCH=opensim-rel-0.9.3.8940
+OS_GIT_REPO=git://opensimulator.org/git/opensim
+OS_GIT_BRANCH=master
+# OS_GIT_BRANCH=opensim-rel-0.9.3.8940
 OS_BUILDTARGET=Release
 OS_SLN=OpenSim.sln
 
