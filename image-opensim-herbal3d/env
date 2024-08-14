@@ -1,0 +1,22 @@
+# Overall parameters for building and storing the OpenSimulator image.
+# This file is 'source'ed in Bash scripts and used by docker-compose.
+
+# While nearly everything can be moved into this file, these are the
+#    top level build and run configurations but most of the configuration
+#    happens in the config-$OS_CONFIG directory.
+
+# NOTE: the assignment format is restricted so it works as a Bash
+#    assignment file and a docker-compose env-file
+
+# The sources to build
+OS_GIT_REPO=git://opensimulator.org/git/opensim
+OS_GIT_BRANCH=master
+# OS_GIT_BRANCH=opensim-rel-0.9.3.8940
+OS_BUILDTARGET=Release
+OS_SLN=OpenSim.sln
+
+# The container parameters
+IMAGE_OWNER=misterblue
+IMAGE_NAME=opensim-herbal3d
+IMAGE_VERSION=latest
+DOCKER_IMAGE="${IMAGE_OWNER}/${IMAGE_NAME}:${IMAGE_VERSION}"

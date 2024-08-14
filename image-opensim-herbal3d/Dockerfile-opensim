@@ -1,10 +1,11 @@
-# OpenSim with Herbal3d region modules
-#   docker build -t opensim-herbal3d .
+# syntax=docker/dockerfile:1
+# OpenSim for a container
+#   docker build -t opensim .
 
 # Built with dotnet8
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-LABEL Description="Docker container running OpenSimulator with Herbal3d extensions"
+LABEL Description="Docker container running OpenSim"
 
 # In the target image, these are directories built and used
 # While parameters, these usually don't change
@@ -28,17 +29,8 @@ ARG OS_DOCKER_GIT_BRANCH=main
 ARG OS_DOCKER_GIT_COMMIT=62fda19d0038a274bf3fd922b023b149b3a40a90
 ARG OS_DOCKER_GIT_COMMIT_SHORT=62fda19d
 
-# Each of the different packages can have their branch over-ridden with a --build-arg
-ARG COMMON_ENTITIES_BRANCH=dotnet6
-ARG COMMON_UTIL_BRANCH=main
-ARG TRANSPORT_BRANCH=master
-ARG LODEN_BRANCH=dotnet6
-ARG OSAUTH_BRANCH=dotnet6
-ARG RAGU_BRANCH=dotnet6
-
 # Include required packages ('coreutils git vim' included for debugging)
 RUN apt-get update \
-    && apt-get upgrade -y \
     && apt-get install -y \
         coreutils procps git vim \
         screen \
@@ -67,46 +59,6 @@ RUN mkdir -p $VERSIONDIR \
 RUN cd $OPENSIMHOME \
     && git clone --depth=1 -b $OS_GIT_BRANCH --single-branch $OS_GIT_REPO opensim
 
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $COMMON_ENTITIES_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonEntitiesCS.git
-
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $COMMON_UTIL_BRANCH --single-branch https://github.com/Herbal3d/HerbalCommonUtilCS.git
-
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $TRANSPORT_BRANCH --single-branch https://github.com/Herbal3d/HerbalTransportCS.git
-
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $LODEN_BRANCH --single-branch https://github.com/Herbal3d/Loden.git
-
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $OSAUTH_BRANCH --single-branch https://github.com/Herbal3d/OSAuthModule.git
-
-RUN cd $OPENSIMDIR/addon-modules/ \
-    && git clone --depth=1 -b $RAGU_BRANCH --single-branch https://github.com/Herbal3d/RaguOS.git
-
-# The Herbal3d images have a special version building tool
-RUN cd $BASEDIR \
-    && git clone --depth=1 -b main --single-branch https://github.com/Herbal3d/BuildVersion.git \
-    && cd BuildVersion \
-    && dotnet build --configuration Debug BuildVersion.sln
-ENV BUILDVERSION=$BASEDIR/BuildVersion/bin/Debug/net6.0/BuildVersion
-RUN cd $OPENSIMDIR/addon-modules/HerbalCommonEntitiesCS/CommonEntities \
-    && chmod +x updateVersion.sh \
-    && ./updateVersion.sh $BUILDVERSION
-RUN cd $OPENSIMDIR/addon-modules/HerbalCommonEntitiesCS/CommonEntitiesConv \
-    && chmod +x updateVersion.sh \
-    && ./updateVersion.sh $BUILDVERSION
-RUN cd $OPENSIMDIR/addon-modules/HerbalTransportCS \
-    && chmod +x updateVersion.sh \
-    && ./updateVersion.sh $BUILDVERSION
-RUN cd $OPENSIMDIR/addon-modules/Loden \
-    && chmod +x updateVersion.sh \
-    && ./updateVersion.sh $BUILDVERSION
-RUN cd $OPENSIMDIR/addon-modules/RaguOS \
-    && chmod +x updateVersion.sh \
-    && ./updateVersion.sh $BUILDVERSION
-
 # Extract version information from the fetched sources
 RUN cd $OPENSIMDIR \
     && echo $OS_GIT_REPO > "$VERSIONDIR/OS_GIT_REPO" \
@@ -118,8 +70,6 @@ RUN cd $OPENSIMDIR \
     && grep "const string VersionNumber" ./OpenSim/Framework/VersionInfo.cs | \
         sed -e "s/^.*VersionNumber = \"\(.*\)\".*$/\1/" > "$VERSIONDIR/OS_VERSION"
 
-# Use the proper drawing library
-RUN cp $OPENSIMDIR/bin/System.Drawing.Common.dll.linux $OPENSIMDIR/bin/System.Drawing.Common.dll
 
 # Build OpenSimulator
 RUN cd $OPENSIMDIR \
@@ -167,11 +117,6 @@ COPY --chown=opensim:opensim temp-run-scripts/vimrc $OPENSIMHOME/.vimrc
 COPY --from=build --chown=opensim:opensim $OPENSIMDIR/bin $OPENSIMDIR/bin
 COPY --from=build --chown=opensim:opensim $VERSIONDIR $VERSIONDIR
 
-# The NuGet DLLs are not copied into the bin directory.
-# TODO: Figure out why NuGet packages are not copied.
-COPY --from=build --chown=opensim:opensim $OPENSIMDIR/.nuget/packages/fleck/1.2.0/lib/netstandard2.0/Fleck.dll $OPENSIMDIR/bin
-COPY --from=build --chown=opensim:opensim $OPENSIMDIR/.nuget/packages/nlog/4.7.15/lib/netstandard2.0/NLog.dll $OPENSIMDIR/bin
-
 # The .ini files in config-include in the image are not used and are emptied here to eliminate any confusion
 RUN cd $OPENSIMDIR/bin/config-include \
     && $OPENSIMHOME/nullOutConfigInclude.sh
@@ -195,5 +140,4 @@ ENTRYPOINT [ "/home/opensim/bootOpenSim.sh" ]
 #    the configuration of the whole system (include 'architecture' ini file and
 #    the necessary other INI files).
 VOLUME $OPENSIMDIR/bin/config
-
 
