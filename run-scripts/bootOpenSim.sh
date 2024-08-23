@@ -6,7 +6,7 @@
 # The environment variable CONFIG_NAME can be set here otherwise
 #    the value in config/os-config is used
 # If os-secrets.crypt exists in the configuration, the environment
-#    variable CONFIGKEY must exist and be the password for the encrypted file
+#    variable OS_CONFIGKEY must exist and be the password for the encrypted file
 
 export OPENSIMHOME=/home/opensim
 export VERSIONDIR=$OPENSIMHOME/VERSION

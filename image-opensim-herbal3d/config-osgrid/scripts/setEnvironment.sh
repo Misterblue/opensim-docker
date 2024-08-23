@@ -11,11 +11,11 @@ cd "$OPENSIMCONFIG"
 
 # See if we have encrypted secrets
 unset HAVE_SECRETS
-if [[ ! -z "$OPENSIM_CONFIGKEY" ]] ; then
+if [[ ! -z "$OS_CONFIGKEY" ]] ; then
     for secretsFile in $OPENSIMCONFIG/os-secrets.crypt ; do
         if [[ -e "$secretsFile" ]] ; then
             echo "opensim-docker: setEnvironment.sh: have secrets file \"{$secretsFile}\""
-            source <(ccrypt -c -E OPENSIM_CONFIGKEY "$secretsFile")
+            source <(ccrypt -c -E OS_CONFIGKEY "$secretsFile")
             HAVE_SECRETS=yes
             break;
         else

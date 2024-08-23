@@ -11,7 +11,7 @@ to the image-* directory.
 for seeing that the configuration files and other setup (like DB) are initialized.
 This script calls `firstTimeSetup.sh` for the first ever boot to do any
 initial setup.
-This script will fail if the environment variables `CONFIGKEY` or `EXTERNAL_HOSTNAME`
+This script will fail if the environment variables `OS_CONFIGKEY` or `EXTERNAL_HOSTNAME`
 are not set.
 
 `run.opensim.sh` starts the OpenSimulator instance.

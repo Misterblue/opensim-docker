@@ -92,7 +92,7 @@ Which configuration is used is specified by environment variables which
 must be set. The environment variables are:
 
 -- *OS_CONFIG*: the configuration to use (like "standalone" or "standalone-sql")
--- *OPENSIM_CONFIGKEY*: (optional) the password for extracting secrets in .crypt files
+-- *OS_CONFIGKEY*: (optional) the password for extracting secrets in .crypt files
 
 The container starts the script `/home/opensim/bootOpenSim.sh` which runs
 configuration scripts and then starts the simulator. There are other scripts
@@ -172,7 +172,7 @@ container.
 Once the Docker image is built, it can be run with a command like:
 
 ```
-OS_CONFIG=standalone OPENSIM_CONFIGKEY=secretPassword ./run-opensim.sh
+OS_CONFIG=standalone OS_CONFIGKEY=secretPassword ./run-opensim.sh
 ```
 
 Once started, a `docker ps` will show something like:
