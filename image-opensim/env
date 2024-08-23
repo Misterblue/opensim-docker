@@ -8,6 +8,9 @@
 # NOTE: the assignment format is restricted so it works as a Bash
 #    assignment file and a docker-compose env-file
 
+# the configuration to run with. This is prepended with "config-" to get the directory
+OS_CONFIG=${OS_CONFIG:-standalone}
+
 # The sources to build
 OS_GIT_REPO=git://opensimulator.org/git/opensim
 OS_GIT_BRANCH=master

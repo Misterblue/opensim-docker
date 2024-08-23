@@ -47,6 +47,7 @@ cd opensim-docker/image-opensim
 
 # Edit the file `env` with parameters for the container to be built. In
 #    particular, specify which configuration to use (`OS_CONFIG`)
+#    or, alternately, set the environment variable OS_CONFIG.
 
 cd config-$OS_CONFIG
 
@@ -55,10 +56,11 @@ cd config-$OS_CONFIG
 #     and encrypt os-secrets.
 
 # Do any additional OpenSimulator configuration
-# Edit 'config-$OS_CONFIG/Include.ini for BaseHostname and server ports
-# Edit 'config-$OS_CONFIG/config-include/*.ini for grid connections
-# Edit 'config-$OS_CONFIG/Regions/Regions.ini for region location
-# Edit 'config-$OS_CONFIG/config-include/Final.ini for DatabaseService and other settings
+# Edit config-$OS_CONFIG/Include.ini for BaseHostname and server ports
+# Edit config-$OS_CONFIG/config-include/*.ini for grid connections
+# Edit config-$OS_CONFIG/Regions/Regions.ini for region location
+# Edit config-$OS_CONFIG/config-include/Final.ini for other settings
+# Edit config-$OS_CONFIG/docker-compose.yml for extra ports (for regions)
 
 # Build OpenSimulator image
 cd
@@ -97,12 +99,41 @@ configuration scripts and then starts the simulator. There are other scripts
 to do setup (`firstTimeSetup.sh`), capture crash information (`captureCrash.sh`),
 or to start the simulator (`run.opensim.sh`). 
 
-The simulator runs as the created user account `opensim` for a little security.
+The simulator runs as the created user account `opensim` for a little additional security.
 
 The `README` files in the sub-directories contain instructions on setup
 of these configuration files and building the images. There are scripts
 for building the images (e.g., `build-opensim.sh`) and then running
 the images with `docker-compose` (e.g., `run-opensim.sh`).
+
+## Example
+
+Say you want to run a standalone image of [OpenSimulator]:
+
+```
+cd
+git clone https://github.com/Misterblue/opensim-docker.git
+cd opensim-docker
+cd image-opensim
+
+# Make a copy of the repository configuration
+cp -r config-standalone config-standalone-mine
+
+# This means the running container will mount `opensim-docker/image-opensim/config-standalone-mine`
+export OS_CONFIG=standalone-mine
+
+cd config-standalone-mine
+# Edit Includes.ini with basehostname and server ports
+# Edit env with any image changes
+# Edit Regions/Regions.ini for your region
+
+cd 
+cd opensim-docker/image-opensim
+./build-opensim.sh
+./run-opensim.sh
+```
+
+Start a viewer and connect to `localhost:9000`!
 
 ## OpenSimulator Configuration
 
@@ -123,6 +154,11 @@ a separate directory. In general,
   a specified directory (default is ./bin/config). This directory is mounted
   to a directory external to the [Docker] container and based on the `OS_CONFIG`.
 
+In the mounted configuration directory (something like `config-standalone` in the source
+directory), the single INI file `Includes.ini` is read first. It includes the "Const"
+section normally found in `OpenSim.ini`, pulls in some environment variables, and then
+includes all necessary files.
+
 In the mounted configuration directory, the file `setup.sh` is run before [OpenSimulator]
 is started to do any setup.
 
@@ -136,7 +172,7 @@ container.
 Once the Docker image is built, it can be run with a command like:
 
 ```
-CONFIG_NAME=standalone CONFIGKEY=secretPassword ./run-opensim.sh
+OS_CONFIG=standalone OPENSIM_CONFIGKEY=secretPassword ./run-opensim.sh
 ```
 
 Once started, a `docker ps` will show something like:
@@ -150,7 +186,7 @@ CONTAINER ID   IMAGE            COMMAND                  CREATED         STATUS 
 
 Which shows the two containers started for the simulator and the database.
 
-The number under "CONTAINER ID" is and ID one uses to address the container. The command
+The number under "CONTAINER ID" is and ID one uses to address the container.
 
 The command `docker logs ID` will list the startup output when the container was started. An example:
 
@@ -179,7 +215,8 @@ To get a console on the OpenSimulator container, the command is
 docker exec -it ID /bin/bash
 ```
 
-(that is, execute an interactive command on the container). This will open a Bash shell on the container.
+(that is, execute the interactive command "/bin/bash" on the running container).
+This will open a Bash shell on the container.
 
 OpenSimulator is started with Screen. Once running the Bash shell on the container, the command:
 

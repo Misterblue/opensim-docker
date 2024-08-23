@@ -1,28 +1,21 @@
 CONFIGURATION ON DOCKER IMAGE
 
-The OpenSim docker image is setup with most of the normal configuration nulled out.
-The file 'bin/OpenSim.ini.example' has been copied to 'bin/OpenSim.ini' but all
-the files that are normally included (from 'bin/config-include') have been emptied so none
-of the normal network, grid, database, or cache setup is present.
+This directory will be mounted in `bin/config` and the running simulator will
+read the `Includes.ini` file. This file imports environment variables, sets
+global "Const" parameters, and then includes the necessary INI files (like
+`StandaloneCommon.ini`, `osslEnable.ini`, ...).
 
-The configuration relies on the feature that OpenSimulator reads all INI files
-in the 'bin/config' directory.
+Most of the files in `config-include` are copies of the standard files from
+the repository. In this setup, most parameters are changed by the overrides
+that happen in `Final.ini` which is the last INI files read (and thus anything
+specified in `Final.ini` overrides anything that came before.
 
-The default installation is for a single region, standalone, sqlite based version
-of OpenSimulator. 'bin/config/setup.sh' copies 'bin/config/standalone/Includes.ini'
-into 'bin/config'. This file includes all the INI files
-needed to configure same. 'Includes.ini' includes files from the 'standalone'
-directory. This includes 'Standalone.ini' and 'StandaloneCommon.ini' to do their
-normal configuration. It finally includes 'Misc.ini' which specifies parameters
-that overlay everything previous for final setting and over-riding.
-
-Edit 'Misc.ini' for specific simulator settings.
+The convention used herein is to use the unchanged INI files from the repository 
+and to make any changes and additions in `Final.ini`.
 
 When the docker image is run, the startup script also checks for 'bin/config/setup.sh'
-and, if it exists, it is executed. This allows initializing databases and any
-passwords that need to be set in the configuration files.
-
-One can completely override the configuration included in this Docker image build
-by mounting a bind volume over '/home/opensim/opensim/bin/config'. For this case,
-all normal OpenSimulator configuration is replaced by whatever one puts in
-that 'config' directory.
+and, if it exists, it is executed. The included version adds `os-secrets` to the
+running environment so those values can be used in the INI files (see the
+"[Environment]" section in `Includes.ini`. So, things like database passwords
+only need to be entered into `os-secrets` and they will be used in the INI files.
+You don't need to change any database configuration in any of the INI files.
