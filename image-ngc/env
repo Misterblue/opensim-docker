@@ -13,14 +13,14 @@ OS_CONFIG=${OS_CONFIG:-standalone}
 
 # The sources to build
 OS_GIT_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
-# OS_GIT_BRANCH=develop
+OS_GIT_BRANCH=develop
 # OS_GIT_BRANCH=opensim-rel-0.9.3.8940
-OS_GIT_BRANCH=opensim-rel-0.9.3.8984
+# OS_GIT_BRANCH=opensim-rel-0.9.3.8984
 OS_BUILDTARGET=Release
 OS_SLN=OpenSim.sln
 
 # The container parameters
 IMAGE_OWNER=misterblue
-IMAGE_NAME=opensim-ncg
+IMAGE_NAME=opensim-ngc
 IMAGE_VERSION=latest
 DOCKER_IMAGE="${IMAGE_OWNER}/${IMAGE_NAME}:${IMAGE_VERSION}"

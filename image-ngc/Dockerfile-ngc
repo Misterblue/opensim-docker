@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # OpenSim for a container
-#   docker build -t ncg .
+#   docker build -t ngc .
 
 # Built with dotnet8
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

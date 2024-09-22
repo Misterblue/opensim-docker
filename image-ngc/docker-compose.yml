@@ -27,7 +27,7 @@ services:
     opensim:
         depends_on:
             - dbservice
-        image: opensim-ncg
+        image: opensim-ngc
         environment:
             OS_CONFIG:
         volumes:

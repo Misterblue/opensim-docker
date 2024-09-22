@@ -3,6 +3,7 @@
 
 BUILD_DATE=$(date "+%Y%m%d.%H%M")
 BUILD_DAY=$(date "+%Y%m%d")
+
 # version infomation about opensim-docker
 OS_DOCKER_VERSION=$(cat ../VERSION.txt)
 OS_DOCKER_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -31,7 +32,7 @@ docker build \
     --build-arg OS_BUILDTARGET=$OS_BUILDTARGET \
     --build-arg OS_SLN=$OS_SLN \
     -t "$IMAGE_NAME" \
-    -f Dockerfile-ncg \
+    -f Dockerfile-ngc \
     .
 
 # Remove the temporarily copied run-scripts to reduce any confusion
