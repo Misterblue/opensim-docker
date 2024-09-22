@@ -19,7 +19,14 @@ done
 if [[ -z "$part" ]] ; then
     echo "${OS_VERSION}-${OS_GIT_BRANCH}-${OS_GIT_COMMIT_SHORT}-${BUILD_DATE}/${OS_DOCKER_IMAGE_VERSION}"
 else
-    cat ${VERSIONDIR}/$part
+    if [[ "$part" == "ALL" ]] ; then
+        cd "$VERSIONDIR"
+        for vn in * ; do
+            echo "$vn = $(cat $vn)"
+        done
+    else
+        cat ${VERSIONDIR}/$part
+    fi
 fi
 
 # echo "$(cat $VERSIONDIR/OS_VERSION)-$(cat $VERSIONDIR/OS_GIT_COMMIT_SHORT)-$(cat $VERSIONDIR/OS_DOCKER_IMAGE_VERSION)-$(cat $VERSIONDIR/BUILD_DATE)-$($VERSIONDIR/OS_DOCKER_GIT_COMMIT_SHORT)"
