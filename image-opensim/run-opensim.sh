@@ -14,7 +14,7 @@ BASE=$(pwd)
 # source ./envToEnvironment.sh
 source ./env
 
-# The selects the configuration to mount and use in the Docker image
+# This selects the configuration to mount and use in the Docker image
 export OS_CONFIG=${OS_CONFIG:-standalone}
 echo "Using configuration \"$OS_CONFIG\""
 
