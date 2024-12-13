@@ -1,4 +1,4 @@
-#! bin/bash
+#! /bin/bash
 # The ./env file is formatted for docker-compose
 # This script outputs a conversion of that file with
 #     'export' added to each line so it can be set into
