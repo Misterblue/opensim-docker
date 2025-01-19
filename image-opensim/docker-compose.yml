@@ -22,12 +22,12 @@ services:
             - ~/opensim-sql-data:/var/lib/mysql
         networks:
             - localnet
-        # restart: always
+        restart: unless-stopped
 
     opensim:
         depends_on:
             - dbservice
-        image: opensim-opensim
+        image: opensim-opensim:latest
         environment:
             OS_CONFIG:
         volumes:
@@ -40,4 +40,4 @@ services:
             - 9010:9010/tcp
             - 9010:9010/udp
 
-        # restart: always
+        restart: unless-stopped
