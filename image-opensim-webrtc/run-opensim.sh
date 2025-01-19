@@ -36,7 +36,7 @@ cd "${BASE}"
 
 # https://docs.docker.com/engine/security/userns-remap/
 # --userns-remap="opensim:opensim"
-docker-compose \
+docker compose \
     --file docker-compose.yml \
     --env-file ./env \
     --project-name opensim-${OS_CONFIG} \
