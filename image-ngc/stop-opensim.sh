@@ -9,10 +9,10 @@ source ./env
 
 export OS_CONFIG=${OS_CONFIG:-standalone}
 
-echo "Stopping configuration $OS_CONFIG from docker compose.sh"
+echo "Stopping configuration $OS_CONFIG from docker-compose.yml"
 
 docker compose \
-    --file docker compose.yml \
+    --file docker-compose.yml \
     --env-file ./env \
     --project-name opensim-${OS_CONFIG} \
     down
