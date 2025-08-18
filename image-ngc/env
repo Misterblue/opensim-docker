@@ -12,10 +12,9 @@
 OS_CONFIG=${OS_CONFIG:-standalone}
 
 # The sources to build
-OS_GIT_REPO=https://github.com/OpenSim-NGC/OpenSim-Sasquatch.git
-OS_GIT_BRANCH=develop
-# OS_GIT_BRANCH=opensim-rel-0.9.3.8940
-# OS_GIT_BRANCH=opensim-rel-0.9.3.8984
+OS_GIT_REPO=https://github.com/OpenSim-NGC/OpenSim-Tranquillity.git
+OS_GIT_BRANCH=master
+# OS_GIT_BRANCH=opensim-rel-0.9.3.9037
 OS_BUILDTARGET=Release
 OS_SLN=OpenSim.sln
 
