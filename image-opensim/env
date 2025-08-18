@@ -12,7 +12,8 @@
 OS_CONFIG=${OS_CONFIG:-standalone}
 
 # The sources to build
-OS_GIT_REPO=git://opensimulator.org/git/opensim
+#OS_GIT_REPO=git://opensimulator.org/git/opensim
+OS_GIT_REPO=git://github.com/opensim/opensim.git
 OS_GIT_BRANCH=master
 # OS_GIT_BRANCH=opensim-rel-0.9.3.8940
 OS_BUILDTARGET=Release
