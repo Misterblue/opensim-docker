@@ -159,21 +159,22 @@ RUN adduser --disabled-password --gecos 'OpenSimulator user' $OS_ACCOUNT
 USER $OS_ACCOUNT:$OS_ACCOUNT
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=opensim:opensim temp-run-scripts/*.sh $OPENSIMHOME
-COPY --chown=opensim:opensim temp-run-scripts/crontab $OPENSIMHOME
-COPY --chown=opensim:opensim temp-run-scripts/vimrc $OPENSIMHOME/.vimrc
+COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/*.sh $OPENSIMHOME/
+COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/crontab $OPENSIMHOME
+COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/vimrc $OPENSIMHOME/.vimrc
 
 # Copy the binary files
-COPY --from=build --chown=opensim:opensim $OPENSIMDIR/bin $OPENSIMDIR/bin
-COPY --from=build --chown=opensim:opensim $VERSIONDIR $VERSIONDIR
+COPY --from=build --chown=$OS_ACCOUNT:$OS_ACCOUNT $OPENSIMDIR/bin $OPENSIMDIR/bin
+COPY --from=build --chown=$OS_ACCOUNT:$OS_ACCOUNT $VERSIONDIR $VERSIONDIR
 
 # The NuGet DLLs are not copied into the bin directory.
 # TODO: Figure out why NuGet packages are not copied.
-COPY --from=build --chown=opensim:opensim $OPENSIMDIR/.nuget/packages/fleck/1.2.0/lib/netstandard2.0/Fleck.dll $OPENSIMDIR/bin
-COPY --from=build --chown=opensim:opensim $OPENSIMDIR/.nuget/packages/nlog/4.7.15/lib/netstandard2.0/NLog.dll $OPENSIMDIR/bin
+COPY --from=build --chown=$OS_ACCOUNT:$OS_ACCOUNT $OPENSIMDIR/.nuget/packages/fleck/1.2.0/lib/netstandard2.0/Fleck.dll $OPENSIMDIR/bin
+COPY --from=build --chown=$OS_ACCOUNT:$OS_ACCOUNT $OPENSIMDIR/.nuget/packages/nlog/4.7.15/lib/netstandard2.0/NLog.dll $OPENSIMDIR/bin
 
 # The .ini files in config-include in the image are not used and are emptied here to eliminate any confusion
 RUN cd $OPENSIMDIR/bin/config-include \
+    && chmod +x $OPENSIMHOME/*.sh \
     && $OPENSIMHOME/nullOutConfigInclude.sh
 
 # Create the directory that is mounted that includes all the configuration
