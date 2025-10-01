@@ -109,7 +109,7 @@ RUN adduser --disabled-password --gecos 'OpenSimulator user' $OS_ACCOUNT
 USER $OS_ACCOUNT:$OS_ACCOUNT
 
 # Scripts that keep OpenSimulator running, make crash reports, clean up log files, etc
-COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/*.sh $OPENSIMHOME
+COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/*.sh $OPENSIMHOME/
 COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/crontab $OPENSIMHOME
 COPY --chown=$OS_ACCOUNT:$OS_ACCOUNT temp-run-scripts/vimrc $OPENSIMHOME/.vimrc
 
