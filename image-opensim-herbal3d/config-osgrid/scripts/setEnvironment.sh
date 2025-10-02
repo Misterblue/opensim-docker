@@ -15,7 +15,11 @@ if [[ ! -z "$OS_CONFIGKEY" ]] ; then
     for secretsFile in $OPENSIMCONFIG/os-secrets.crypt ; do
         if [[ -e "$secretsFile" ]] ; then
             echo "opensim-docker: setEnvironment.sh: have secrets file \"{$secretsFile}\""
+            # export key for ccrypt - otherwise it fails
+            export OS_CONFIGKEY=$OS_CONFIGKEY;
             source <(ccrypt -c -E OS_CONFIGKEY "$secretsFile")
+            # unset the key again
+            unset OS_CONFIGKEY;
             HAVE_SECRETS=yes
             break;
         else
