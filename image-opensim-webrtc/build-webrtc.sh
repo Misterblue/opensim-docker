@@ -30,6 +30,7 @@ docker build \
     --build-arg OS_GIT_BRANCH=$OS_GIT_BRANCH \
     --build-arg OS_BUILDTARGET=$OS_BUILDTARGET \
     --build-arg OS_SLN=$OS_SLN \
+    --build-arg WEBRTC_BRANCH=$WEBRTC_BRANCH \
     -t "$IMAGE_NAME" \
     -f Dockerfile-webrtc \
     .
