@@ -226,6 +226,10 @@ screen -r OpenSimScreen
 
 will connect you to the OpenSimulator console. *TO EXIT SCREEN* the command is `cntl-A` followed by `cntl-D`.
 
+# Contributors
+
+Christopher Händler github@lordfox.de
+
 [OpenSimulator]: https://opensimulator.org
 [Docker]: https://www.docker.com
 [Herbal3d]: https://www.herbal3d.org
